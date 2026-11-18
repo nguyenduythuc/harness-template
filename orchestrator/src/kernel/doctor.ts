@@ -139,7 +139,7 @@ export function staticChecks(projectDir: string): { checks: Check[]; ctx: Ctx | 
     out.push(check(".claude/settings.local.json", risky ? "warn" : true, risky ? "it allows broad tools or bypass mode in human sessions. Agent sessions do not load it." : "present, no broad allow"));
   }
   try {
-    const problems = validateH(readHFromProject(projectDir));
+    const problems = validateH(readHFromProject(projectDir), (rel) => fs.existsSync(path.join(projectDir, rel)));
     out.push(check("H0 is valid", problems.length ? false : true, problems.length ? problems.join("; ") : "each skill and subagent follows the format rules, has a trigger line and has its files"));
   } catch (err) {
     out.push(check("H0 is valid", false, String(err)));

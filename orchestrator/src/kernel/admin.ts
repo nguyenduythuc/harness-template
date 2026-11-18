@@ -96,7 +96,7 @@ export function proposeFreezeH0(ctx: Ctx): { file: string; sha: string } {
   const dirty = git(["status", "--porcelain"], ctx.pp.projectDir).trim();
   if (dirty) throw new Error("The working tree has changes. Commit or stash them first: H0 must be a commit.");
   const sha = git(["rev-parse", "HEAD"], ctx.pp.projectDir).trim();
-  const problems = validateH(readHFromGit(ctx.pp.projectDir, sha));
+  const problems = validateH(readHFromGit(ctx.pp.projectDir, sha), (rel) => fs.existsSync(path.join(ctx.pp.projectDir, rel)));
   if (problems.length) throw new Error(`H0 at ${sha.slice(0, 12)} is not valid:\n` + problems.map((p) => "  - " + p).join("\n"));
   return { file: writeProposal(lockPath(ctx.pp.projectDir), { ...ctx.lock, h0_sha: sha }), sha };
 }

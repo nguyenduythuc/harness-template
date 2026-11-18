@@ -1,4 +1,4 @@
-- Do not read, print or copy a value from a `.env*` file. Do not put a token, a password or a key in code, a test, a log or a message.
+- Do not read, print or copy a value from a `.env*` file that git does not track (`.env`, `*.local`). Do not put a token, a password or a key in code, a test, a log or a message.
 - Do not call a production endpoint from code that you run, a test or a script. Tests use fake data.
 - Do not push, and do not merge into a protected branch. A human opens and merges each merge request.
 - Do not change the CI files, `Dockerfile*` or `.claude/hooks/` unless the task asks for it.

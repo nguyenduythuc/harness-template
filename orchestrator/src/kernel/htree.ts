@@ -258,7 +258,12 @@ export function unsafeH(tree: HTree): string[] {
 }
 
 /** Problems that make a candidate tree invalid (docs/plan.md and the editor prompt: "rules that discard the proposal"). */
-export function validateH(tree: HTree): string[] {
+/**
+ * @param projectHas optional: true when the project has this path at its root. A `scripts/` path
+ *   that the project has (for example `scripts/test/check.test.mjs`) is a project file, not a missing
+ *   script of H (C44).
+ */
+export function validateH(tree: HTree, projectHas?: (rel: string) => boolean): string[] {
   const problems: string[] = [];
   const alwaysOn = ["instructions.md", "guardrails.md"].map((f) => (tree.get(f) ?? Buffer.alloc(0)).toString("utf8")).join("\n");
   const skillDirs = new Set<string>();
@@ -299,7 +304,7 @@ export function validateH(tree: HTree): string[] {
     if (!scalarText(fm.keys.get("description") ?? "")) problems.push(`${rel}: frontmatter needs a description.`);
   }
   problems.push(...unsafeH(tree));
-  problems.push(...missingFiles(tree));
+  problems.push(...missingFiles(tree, projectHas));
   return [...new Set(problems)];
 }
 
@@ -309,7 +314,7 @@ export function validateH(tree: HTree): string[] {
  * point to the shared `scripts/` folder of H. `assets/` is not checked, because many projects have
  * an `assets/` folder of their own.
  */
-function missingFiles(tree: HTree): string[] {
+function missingFiles(tree: HTree, projectHas: (rel: string) => boolean = () => false): string[] {
   const out: string[] = [];
   const clean = (s: string): string => s.replace(/[.,;:)`'"\]]+$/, "");
   for (const [file, data] of tree) {
@@ -321,6 +326,7 @@ function missingFiles(tree: HTree): string[] {
       const shared = `scripts/${name}`;
       const local = skill && !m[1] ? `${skill}scripts/${name}` : null;
       if (tree.has(shared) || (local && tree.has(local))) continue;
+      if (!m[1] && projectHas(shared)) continue;
       out.push(local ? `${shared} is named in ${file} but is missing (looked in ${skill}scripts/ and scripts/).` : `${shared} is named in the harness but is missing.`);
     }
     if (!skill) continue;

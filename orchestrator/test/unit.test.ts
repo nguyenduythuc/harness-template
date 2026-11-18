@@ -666,3 +666,15 @@ test("evidence: counts commits, reverts and hot folders from the git history", (
   assert.equal(e.testFiles, 1);
   assert.deepEqual(e.hotDirs[0], { dir: "src/components/Form", changes: 3 });
 });
+
+test("H0 check: a scripts/ path that the project has at its root is a project file (C44)", () => {
+  const t = new Map([
+    ["instructions.md", Buffer.from("Use the check skill.\n")],
+    ["skills/check/SKILL.md", Buffer.from("---\nname: check\ndescription: d. Use when a task changes text.\n---\nRun scripts/test/check-messages.test.mjs.\n")],
+  ]);
+  assert.match(validateH(t).join("\n"), /scripts\/test\/check-messages\.test\.mjs is named/);
+  assert.deepEqual(validateH(t, (rel) => rel === "scripts/test/check-messages.test.mjs"), []);
+  // harness/scripts/... always means a script of H.
+  t.set("skills/check/SKILL.md", Buffer.from("---\nname: check\ndescription: d. Use when a task changes text.\n---\nRun harness/scripts/x.mjs.\n"));
+  assert.match(validateH(t, () => true).join("\n"), /scripts\/x\.mjs is named/);
+});
