@@ -587,6 +587,17 @@ test("packs: the hooks work, and no pack holds a token", () => {
   assert.equal(decide({ pattern: "**/.env*" }), true);
   assert.equal(decide({ pattern: "process.env.REST_ENDPOINT" }), false);
   assert.equal(decide({ file_path: "/p/.env.example" }), false);
+  // A tracked .env file is in the repo already, so the hook allows it. An untracked one can hold secrets.
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), "harness-env-"));
+  assert.equal(spawnSync("git", ["init", "-q"], { cwd: repo }).status, 0);
+  fs.writeFileSync(path.join(repo, ".env.development"), "URL=https://example.com\n");
+  fs.writeFileSync(path.join(repo, ".env.local"), "TOKEN=1\n");
+  assert.equal(spawnSync("git", ["add", ".env.development"], { cwd: repo }).status, 0);
+  const inRepo = (tool_input: object): boolean =>
+    spawnSync(process.execPath, [hook], { input: JSON.stringify({ tool_input }), encoding: "utf8", env: { ...process.env, CLAUDE_PROJECT_DIR: repo } }).stdout.includes('"deny"');
+  assert.equal(inRepo({ file_path: path.join(repo, ".env.development") }), false);
+  assert.equal(inRepo({ file_path: path.join(repo, ".env.local") }), true);
+  assert.equal(inRepo({ command: "cat .env.development .env.local" }), true);
   assert.equal(decide({ command: "yarn build" }), false);
 
   const all = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? all(path.join(d, e.name)) : [path.join(d, e.name)]));
@@ -654,4 +665,16 @@ test("evidence: counts commits, reverts and hot folders from the git history", (
   assert.equal(e.checkFixes, 1);
   assert.equal(e.testFiles, 1);
   assert.deepEqual(e.hotDirs[0], { dir: "src/components/Form", changes: 3 });
+});
+
+test("H0 check: a scripts/ path that the project has at its root is a project file (C44)", () => {
+  const t = new Map([
+    ["instructions.md", Buffer.from("Use the check skill.\n")],
+    ["skills/check/SKILL.md", Buffer.from("---\nname: check\ndescription: d. Use when a task changes text.\n---\nRun scripts/test/check-messages.test.mjs.\n")],
+  ]);
+  assert.match(validateH(t).join("\n"), /scripts\/test\/check-messages\.test\.mjs is named/);
+  assert.deepEqual(validateH(t, (rel) => rel === "scripts/test/check-messages.test.mjs"), []);
+  // harness/scripts/... always means a script of H.
+  t.set("skills/check/SKILL.md", Buffer.from("---\nname: check\ndescription: d. Use when a task changes text.\n---\nRun harness/scripts/x.mjs.\n"));
+  assert.match(validateH(t, () => true).join("\n"), /scripts\/x\.mjs is named/);
 });

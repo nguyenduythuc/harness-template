@@ -144,3 +144,51 @@ test("the GitLab guard job takes the script from the target branch", () => {
   const ok = run("owner-change");
   assert.equal(ok.status, 0, ok.stdout + ok.stderr);
 });
+
+test("AGENTS.md: the root CLAUDE.md imports it, and each nested AGENTS.md gets a CLAUDE.md that imports it", () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, "package.json"), "{}");
+  fs.writeFileSync(path.join(dir, "AGENTS.md"), "# Rules\n");
+  fs.mkdirSync(path.join(dir, "apps", "web"), { recursive: true });
+  fs.writeFileSync(path.join(dir, "apps", "web", "AGENTS.md"), "# Web rules\n");
+  fs.mkdirSync(path.join(dir, "apps", "docs"), { recursive: true });
+  fs.writeFileSync(path.join(dir, "apps", "docs", "AGENTS.md"), "# Docs rules\n");
+  fs.writeFileSync(path.join(dir, "apps", "docs", "CLAUDE.md"), "# Own file\n");
+  fs.mkdirSync(path.join(dir, "node_modules", "x"), { recursive: true });
+  fs.writeFileSync(path.join(dir, "node_modules", "x", "AGENTS.md"), "no\n");
+  const r = scaffold({ projectDir: dir });
+  assert.ok(fs.readFileSync(path.join(dir, "CLAUDE.md"), "utf8").startsWith("@AGENTS.md\n\n<!-- harness:begin"));
+  assert.equal(fs.readFileSync(path.join(dir, "apps", "web", "CLAUDE.md"), "utf8"), "@AGENTS.md\n");
+  assert.equal(fs.readFileSync(path.join(dir, "apps", "docs", "CLAUDE.md"), "utf8"), "# Own file\n");
+  assert.ok(r.created.includes("apps/web/CLAUDE.md"));
+  assert.equal(fs.existsSync(path.join(dir, "node_modules", "x", "CLAUDE.md")), false);
+});
+
+test("detect-stack: a build script that fails on purpose is not the gate, and pnpm-workspace.yaml means workspaces", async () => {
+  const { detectStack } = await import("../../plugins/harness/scripts/detect-stack.mjs");
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, "pnpm-lock.yaml"), "");
+  fs.writeFileSync(path.join(dir, "pnpm-workspace.yaml"), "packages:\n  - apps/*\n");
+  fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ scripts: { build: 'echo "pick: build:dev | build:pro" && exit 1', "build:dev": "turbo run build:dev", "build:pro": "turbo run build:pro", typecheck: "turbo run typecheck" } }));
+  const s = detectStack(dir);
+  assert.equal(s.workspaces, true);
+  assert.equal(s.gate.build, "pnpm build:dev");
+  assert.equal(s.gate.typecheck, "pnpm typecheck");
+  assert.ok(s.notes.some((n) => n.includes("fails on purpose")));
+  fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ scripts: { build: "exit 1" } }));
+  assert.equal(detectStack(dir).gate.build, "TODO");
+});
+
+test("a project with Prettier gets the guard folder in .prettierignore", () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, "package.json"), "{}");
+  fs.writeFileSync(path.join(dir, "prettier.config.mjs"), "export default {};\n");
+  fs.writeFileSync(path.join(dir, ".prettierignore"), "node_modules\n");
+  const r = scaffold({ projectDir: dir });
+  assert.ok(r.proposed.includes(".prettierignore.harness-proposed"));
+  assert.equal(fs.readFileSync(path.join(dir, ".prettierignore.harness-proposed"), "utf8"), "node_modules\n.github/harness/\n");
+  const none = tmp();
+  fs.writeFileSync(path.join(none, "package.json"), "{}");
+  scaffold({ projectDir: none });
+  assert.equal(fs.existsSync(path.join(none, ".prettierignore")), false);
+});
