@@ -1,0 +1,11 @@
+{
+  "name": "harness",
+  "displayName": "Harness Template",
+  "version": "0.1.0",
+  "description": "Scaffold a measured execution harness into a project, guard the owner rules, and run the doctor.",
+  "author": {
+    "name": "Nguyễn Duy Thức"
+  },
+  "repository": "https://github.com/nguyenduythuc/harness-template",
+  "keywords": ["harness", "eval", "guard", "harness2"]
+}

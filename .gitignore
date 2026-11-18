@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+*.log
+.DS_Store
+.env
+.env.*
+# Local runs of the orchestrator. Only the orchestrator writes here.
+harness/runs/

@@ -1,0 +1,2 @@
+- Put a test next to the code: `src/utils/common.ts` has `src/utils/common.test.ts`. Run one file with the test script and the path of the file.
+- Put the logic of a component in a pure function or a hook, and test that. A test of a full page costs more and breaks more.

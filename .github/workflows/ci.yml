@@ -1,0 +1,32 @@
+# CI of the harness-template repo: build and test the orchestrator, and test the plugin scripts.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: orchestrator/package-lock.json
+      - name: Install the orchestrator
+        working-directory: orchestrator
+        run: npm ci
+      - name: Typecheck
+        working-directory: orchestrator
+        run: npm run typecheck
+      - name: Orchestrator tests (unit and integration, with a fake Agent SDK)
+        working-directory: orchestrator
+        run: npm test
+      - name: Plugin script tests
+        run: node --test "tests/plugin/*.test.mjs"

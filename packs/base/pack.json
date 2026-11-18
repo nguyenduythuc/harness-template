@@ -1,0 +1,9 @@
+{
+  "name": "base",
+  "description": "Hooks (no .env access, format and console.log report), the mr-reviewer agent, a CI job that runs the gate, and human rules. For each JavaScript or TypeScript project.",
+  "manual": [
+    "GitLab only: add `include: [{ local: .gitlab/harness/gate.gitlab-ci.yml }]` to .gitlab-ci.yml. Set the CI/CD variable HARNESS_NODE_IMAGE if the runners use a private registry.",
+    "Read docs/claude-code.md, put the names of the skills of the project in its table, and give the page to the team.",
+    "Run `harness doctor`, then `harness gate-check`."
+  ]
+}

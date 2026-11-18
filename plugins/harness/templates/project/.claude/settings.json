@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "harness-template": {
+      "source": { "source": "github", "repo": "nguyenduythuc/harness-template" }
+    }
+  },
+  "enabledPlugins": {
+    "harness@harness-template": true
+  }
+}

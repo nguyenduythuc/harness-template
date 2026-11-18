@@ -1,0 +1,3 @@
+- Do not add or update a dependency unless the task asks for it. Then use the package manager of the project. Do not make a second lock file.
+- When client code reads a new env value without the `NEXT_PUBLIC_` prefix, add the value to the `env` map of the Next.js config. If you do not, the value is undefined in the browser.
+- When you add a text that the user sees, add its key to the translation file of each language, at the same path.

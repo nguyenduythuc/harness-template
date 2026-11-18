@@ -1,0 +1,14 @@
+{
+  "name": "harness-template",
+  "description": "The harness plugin: scaffolds a measured execution harness into a project and guards its owner rules.",
+  "owner": {
+    "name": "Nguyễn Duy Thức"
+  },
+  "plugins": [
+    {
+      "name": "harness",
+      "source": "./plugins/harness",
+      "description": "Scaffold harness/ into a project, guard pinned- and loop-owned files, run the doctor and the reports."
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# Run records stay on this machine. The leading slash keeps harness/reports/runs/ in git.
+/runs/

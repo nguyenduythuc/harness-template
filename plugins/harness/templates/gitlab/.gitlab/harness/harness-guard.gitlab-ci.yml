@@ -1,0 +1,43 @@
+# harness-guard: enforcement layer 5 on GitLab.
+#
+# Add this file to the pipeline. In .gitlab-ci.yml:
+#   include:
+#     - local: .gitlab/harness/harness-guard.gitlab-ci.yml
+#
+# The job takes the guard script from the TARGET branch, so a merge request cannot change the
+# script that judges it. The job never runs code from the merge request: it reads the diff and
+# file contents with git only.
+#
+# CAUTION: GitLab reads .gitlab-ci.yml from the SOURCE branch. A merge request can remove the
+# include line. To close this hole, do one of these:
+#   - Code Owners: make a human the owner of /.gitlab-ci.yml and /.gitlab/, and require the
+#     approval of code owners on the protected branch.
+#   - Keep the CI configuration in a different project (Settings > CI/CD > CI/CD configuration file).
+# Without one of them, layer 5 finds a bad merge request, but it cannot always stop it.
+#
+# This file is an exception path (.gitlab/**). Only a human changes it.
+harness-guard:
+  stage: .pre
+  image: node:22-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  variables:
+    GIT_DEPTH: "0"
+  cache: []
+  before_script: []
+  script:
+    - apk add --no-cache git > /dev/null
+    - BASE="$CI_MERGE_REQUEST_DIFF_BASE_SHA"
+    - GUARD="$(mktemp -d)" && mkdir -p "$GUARD/lib"
+    - |
+      if ! git show "$BASE:.gitlab/harness/ci-path-guard.mjs" > "$GUARD/ci-path-guard.mjs" 2> /dev/null ||
+         ! git show "$BASE:.gitlab/harness/lib/ownership.mjs" > "$GUARD/lib/ownership.mjs" 2> /dev/null; then
+        echo "harness-guard: the target branch has no guard script yet. No check for this merge request."
+        exit 0
+      fi
+    - |
+      case "$GITLAB_USER_LOGIN" in
+        *_bot|*_bot_*) AUTHOR_TYPE=Bot ;;
+        *) AUTHOR_TYPE=User ;;
+      esac
+    - node "$GUARD/ci-path-guard.mjs" --base "$BASE" --head "$CI_COMMIT_SHA" --labels "$CI_MERGE_REQUEST_LABELS" --author-type "$AUTHOR_TYPE"

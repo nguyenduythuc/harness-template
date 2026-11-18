@@ -1,0 +1,1 @@
+- Before a merge request or a pull request: ask the mr-reviewer agent for a review.

@@ -1,0 +1,21 @@
+# The gate of harness/pinned-config.yaml as a merge request job, for people and for agents.
+# `harness pack install base` wrote the commands from the gate block. Keep them equal to it.
+#
+# Add this file to the pipeline. In .gitlab-ci.yml:
+#   include:
+#     - local: .gitlab/harness/gate.gitlab-ci.yml
+#
+# A private registry: set the CI/CD variable HARNESS_NODE_IMAGE in the project settings.
+harness-gate:
+  stage: test
+  image: $HARNESS_NODE_IMAGE
+  variables:
+    HARNESS_NODE_IMAGE: node:24-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - {{install}}
+    - {{gate.build}}
+    - {{gate.typecheck}}
+    - {{gate.lint}}
+    - {{gate.test}}

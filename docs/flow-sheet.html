@@ -1,0 +1,1413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Harness Template Flow Sheet</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: an engineering drawing sheet. Zoned frame, lettered panels, title block in the last zone.
+   Panel A (the flow) spans the sheet; reference panels tile below it. */
+:root{
+  --ground:#e8edf2; --paper:#fbfcfd; --ink:#131920; --line:#1a2129; --rule:#cfd7e0; --muted:#566271;
+  --lane:#f0f3f7; --accent:#1c5bc3; --accent-soft:#e1eaf9; --warn:#bb3628; --warn-soft:#f9e5e1;
+  --f-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-cond:"IBM Plex Sans Condensed","IBM Plex Sans","Arial Narrow",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#090c10; --paper:#10151b; --ink:#e1e7ee; --line:#c2cbd5; --rule:#29323c; --muted:#8e9aaa;
+    --lane:#141a21; --accent:#7aa9ff; --accent-soft:#172741; --warn:#ff8b7b; --warn-soft:#3a1d19;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#090c10; --paper:#10151b; --ink:#e1e7ee; --line:#c2cbd5; --rule:#29323c; --muted:#8e9aaa;
+  --lane:#141a21; --accent:#7aa9ff; --accent-soft:#172741; --warn:#ff8b7b; --warn-soft:#3a1d19;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:14px/1.5 var(--f-sans);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1600px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.mono{font-family:var(--f-mono)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Header bar */
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.eyebrow{font:11px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.top h1{margin:2px 0 0;font:600 26px/1.15 var(--f-cond);text-wrap:balance}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line)}
+.seg button{border:0;background:var(--paper);padding:6px 11px;font:500 12.5px var(--f-sans);cursor:pointer;border-left:1px solid var(--line)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--line);color:var(--paper)}
+.chk{display:inline-flex;gap:7px;align-items:center;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.chk.disabled{color:var(--muted);cursor:default}
+
+/* Sheet frame with zone rulers */
+.sheet{position:relative;background:var(--paper);border:1.5px solid var(--line);padding:22px}
+.ruler{position:absolute;display:flex;font:10.5px var(--f-mono);color:var(--muted);pointer-events:none}
+.ruler span{flex:1;display:grid;place-items:center}
+.ruler.t,.ruler.b{left:22px;right:22px;height:22px}
+.ruler.t{top:0}.ruler.b{bottom:0}
+.ruler.t span+span,.ruler.b span+span{border-left:1px solid var(--line)}
+.ruler.l,.ruler.r{top:22px;bottom:22px;width:22px;flex-direction:column}
+.ruler.l{left:0}.ruler.r{right:0}
+.ruler.l span+span,.ruler.r span+span{border-top:1px solid var(--line)}
+.inner{border:1px solid var(--line);padding:20px;display:grid;gap:20px;grid-template-columns:minmax(0,1fr);align-items:start}
+
+/* Panels */
+.panel{border:1.5px solid var(--line);background:var(--paper);min-width:0;display:flex;flex-direction:column}
+.ph{display:flex;align-items:stretch;border-bottom:1px solid var(--line);min-height:40px}
+.pl{flex:0 0 38px;display:grid;place-items:center;background:var(--line);color:var(--paper);font:600 16px var(--f-cond)}
+.ph h2{margin:0;flex:1;padding:8px 12px;font:600 17px/1.25 var(--f-cond);align-self:center;text-wrap:balance}
+.pm{padding:0 12px;align-self:center;font:11px var(--f-mono);color:var(--muted);text-align:right}
+.pb{padding:14px 16px 16px;display:grid;gap:12px;min-width:0}
+.lead{margin:0;max-width:78ch}
+.note{margin:0;font-size:12.5px;color:var(--muted);max-width:90ch}
+.sub{margin:4px 0 -4px;font:11px var(--f-mono);color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+
+/* Tables */
+.tw{overflow-x:auto;min-width:0}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font:400 11px var(--f-mono);color:var(--muted);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:7px 8px;border-bottom:1px solid var(--rule);vertical-align:top}
+.tbl tbody tr:nth-child(even) td{background:var(--lane)}
+.tbl td.k{font-weight:600;font-family:var(--f-cond);font-size:13.5px;white-space:nowrap}
+.tbl td.m{font-family:var(--f-mono);font-size:12px}
+.tbl td.c-on,.tbl tbody tr:nth-child(even) td.c-on{background:var(--accent-soft)}
+.tbl th.c-on{color:var(--accent)}
+.ph-chip{font:11px var(--f-mono);white-space:nowrap}
+.tbl .num{display:none}
+.ph-chip.late{color:var(--muted)}
+
+/* Flow panel */
+.pa-top{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;justify-content:space-between}
+.flow-wrap{overflow-x:auto;border:1px solid var(--rule);background:var(--paper)}
+#flow{display:block;width:100%;min-width:1240px;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.lg-box{width:18px;height:11px;border:1.3px solid var(--ink);display:inline-block}
+.lg-box.d{border-style:dashed}
+.lg-box.f{opacity:.25}
+.lg-no{width:16px;height:16px;border-radius:50%;background:var(--line);color:var(--paper);font:500 9.5px/16px var(--f-mono);text-align:center;display:inline-block}
+.player{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;border:1px solid var(--line);padding:8px 10px;background:var(--lane)}
+.pbtns{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.btn{font:500 13px var(--f-sans);border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:5px 12px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn.pri{background:var(--line);color:var(--paper);min-width:86px;justify-content:center}
+.btn svg{width:12px;height:12px;fill:currentColor}
+.cap{margin:0;flex:1 1 360px;min-width:0;font-size:13.5px}
+.cap .k{font:11px var(--f-mono);color:var(--muted);margin-right:8px;white-space:nowrap}
+.cap .w{display:block;font-size:12px;color:var(--warn)}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.st button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:22px minmax(0,1fr);gap:2px 10px;width:100%;height:100%;align-content:start;padding:10px 12px;border:1px solid var(--rule);background:var(--paper);cursor:pointer}
+.st button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.st button:hover{border-color:var(--line)}
+.st.on button{border-color:var(--accent);background:var(--accent-soft)}
+.st .no{grid-row:1 / span 3;width:22px;height:22px;border-radius:50%;background:var(--line);color:var(--paper);font:500 11px/22px var(--f-mono);text-align:center}
+.st.on .no{background:var(--accent)}
+.st .ac{font:10.5px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.st .tt{font:600 14px/1.3 var(--f-cond)}
+.st .tx{font-size:13px}
+.st.quiet .tt,.st.quiet .tx{color:var(--muted)}
+
+/* SVG flow */
+#flow .lane{fill:var(--paper)} #flow .lane.alt{fill:var(--lane)}
+#flow .lb{stroke:var(--rule);stroke-width:1}
+#flow .lcol{stroke:var(--line);stroke-width:1}
+#flow .ln1{font:600 13px var(--f-cond);fill:var(--ink)}
+#flow .ln2{font:10.5px var(--f-mono);fill:var(--muted)}
+#flow .nb{fill:var(--paper);stroke:var(--ink);stroke-width:1.3}
+#flow .node.dash .nb{stroke-dasharray:5 4}
+#flow .nt1{font:600 12.5px var(--f-cond);fill:var(--ink)}
+#flow .nt2{font:10.5px var(--f-mono);fill:var(--muted)}
+#flow .ep{fill:none;stroke:var(--ink);stroke-width:1.2}
+#flow .edge.dash .ep{stroke-dasharray:5 4}
+#flow .el{font:10.5px var(--f-mono);fill:var(--muted);paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round}
+#flow .ft{font:10.5px var(--f-mono);fill:var(--muted)}
+#flow .jd{fill:var(--ink)}
+#flow .mk{fill:var(--ink)} #flow .mk-on{fill:var(--accent)}
+#flow .bdg circle{fill:var(--line)}
+#flow .bdg text{font:500 10px var(--f-mono);fill:var(--paper)}
+#flow .node.on .nb{stroke:var(--accent);stroke-width:2;fill:var(--accent-soft)}
+#flow .node.on .bdg circle{fill:var(--accent)}
+#flow .edge.on .ep{stroke:var(--accent);stroke-width:2;stroke-dasharray:7 5;animation:march .9s linear infinite}
+#flow .edge.on .el,#flow .ft.on{fill:var(--accent)}
+#flow .edge.on .jd{fill:var(--accent)}
+#flow .dim{opacity:.36}
+#flow .off{opacity:.15}
+@keyframes march{to{stroke-dashoffset:-12}}
+
+/* Rule figure, gauge */
+.fig{margin:0;display:grid;gap:6px}
+.fig > svg{display:block;width:100%;height:auto;max-width:560px}
+.fig figcaption{font-size:12px;color:var(--muted)}
+.fig .ax{stroke:var(--ink);stroke-width:1}
+.fig .gl{stroke:var(--ink);stroke-width:1;stroke-dasharray:3 3}
+.fig .tk{font:10.5px var(--f-mono);fill:var(--muted)}
+.fig .lb{font:600 12.5px var(--f-cond);fill:var(--ink)}
+.fig .i-pass{stroke:var(--accent);fill:var(--accent)}
+.fig .i-inc{stroke:var(--muted);fill:var(--muted)}
+.fig .i-fail{stroke:var(--warn);fill:var(--warn)}
+.fig .iv{stroke-width:2.2}
+.fig .band{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1}
+.fig .bar{fill:var(--accent)} .fig .bar.over{fill:var(--warn)}
+.fig .tg{stroke:var(--ink);stroke-width:1.5;stroke-dasharray:4 3}
+.fig .vl{font:500 11px var(--f-mono);fill:var(--ink)}
+.formula{font:13px var(--f-mono);padding:10px 12px;border:1px solid var(--rule);background:var(--lane);overflow-x:auto;white-space:nowrap}
+.defs{margin:0;padding-left:18px;font-size:13px;display:grid;gap:3px}
+.rules{margin:0;padding:0;list-style:none;display:grid;gap:4px;font-size:13px}
+.rules b{font-family:var(--f-cond);font-weight:600}
+
+/* Calculator */
+.calc{display:grid;gap:9px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,140px) 42px;gap:10px;align-items:center;font-size:13px}
+.crow label{min-width:0}
+.crow output{font:500 13px var(--f-mono);text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--line)}
+.kpi{padding:8px 10px;border-left:1px solid var(--rule);min-width:0}
+.kpi:first-child{border-left:0}
+.kpi .l{font:10.5px var(--f-mono);color:var(--muted)}
+.kpi .v{font:600 22px/1.2 var(--f-cond);font-variant-numeric:tabular-nums}
+.verdict{margin:0;font-size:13px;padding:7px 10px;border:1px solid var(--accent);background:var(--accent-soft)}
+.verdict.over{border-color:var(--warn);background:var(--warn-soft)}
+.cost{margin:0;font:12px var(--f-mono);color:var(--muted)}
+.kpi .v.over{color:var(--warn)}
+.presets{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.presets .sub{margin:0 4px 0 0}
+.presets .btn[aria-pressed="true"]{background:var(--line);color:var(--paper)}
+.fig .dot-ok{fill:var(--accent)} .fig .dot-low{fill:var(--warn)} .fig .dot-mean{fill:var(--ink)}
+.fig .stem{stroke:var(--rule);stroke-width:1.5}
+.fig .zone{fill:var(--warn-soft)}
+.fig .rbar{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1}
+.fig .rbar.over{fill:var(--warn-soft);stroke:var(--warn)}
+
+/* Guard layers */
+.layers{list-style:none;margin:0;padding:0;border:1px solid var(--line)}
+.layers li{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:3px 10px;padding:9px 12px;border-top:1px solid var(--rule)}
+.layers li:first-child{border-top:0}
+.ly-n{font:500 12px/20px var(--f-mono)}
+.ly-t{font:600 14px/20px var(--f-cond)}
+.ly-x{grid-column:2 / -1;font-size:13px}
+.tag{font:10.5px var(--f-mono);padding:1px 6px;border:1px solid currentColor;align-self:start;white-space:nowrap}
+.tag.auth{color:var(--accent)} .tag.loc{color:var(--muted)}
+.tag.ok{color:var(--accent)} .tag.part{color:var(--ink)} .tag.stop{color:var(--warn)} .tag.no{color:var(--muted);border-style:dashed}
+.ly-c{display:inline-block;max-width:100%;font:400 11.5px var(--f-mono);color:var(--muted);margin-left:6px}
+#roomFig .tk{font-size:11.5px} #roomFig .vl{font-size:12px} #roomFig .lb{font-size:13px}
+
+/* Encode, verify, retro strip */
+.evr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--line)}
+.evr > div{padding:8px 10px;border-left:1px solid var(--rule);min-width:0;display:grid;gap:4px;align-content:start}
+.evr > div:first-child{border-left:0}
+.evr .l{font:10.5px var(--f-mono);color:var(--muted)}
+.evr .n{font:600 14px/1.3 var(--f-cond);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.evr .x{font-size:12.5px}
+
+/* Code layers */
+.lyrs{list-style:none;margin:0;padding:0;display:grid;gap:22px}
+.lyrs li{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:3px 10px;padding:8px 12px;border:1px solid var(--line);background:var(--paper)}
+.lyrs li + li::before{content:attr(data-arrow);position:absolute;top:-20px;left:12px;font:10.5px/18px var(--f-mono);color:var(--muted)}
+.ly-nm{font:600 14px/20px var(--f-mono);min-width:0}
+.ly-f{font:400 11px var(--f-mono);color:var(--muted);margin-left:6px}
+.lyrs .ly-x{grid-column:1 / -1;font-size:13px}
+.ly-b{grid-column:1 / -1;display:flex;align-items:center;gap:8px;font:10.5px var(--f-mono);color:var(--muted)}
+.ly-b i{display:block;flex:0 0 auto;height:6px;background:var(--accent);min-width:2px}
+.ly-b span{white-space:nowrap}
+.lyrs li.none .ly-b i{background:var(--muted)}
+
+/* Phases */
+.phases{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0 12px;position:relative}
+.phases::before{content:"";position:absolute;left:4%;right:4%;top:31px;border-top:1px solid var(--line)}
+.phi{position:relative;display:grid;gap:4px;justify-items:center;text-align:center;align-content:start}
+.ph-y{font:600 15px/22px var(--f-cond)}
+.ph-d{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper)}
+.ph-n{font:600 13px/1.3 var(--f-cond);margin-top:4px}
+.ph-g{font-size:12px;color:var(--muted)}
+.ph-s{font-size:11.5px;color:var(--muted);display:grid;gap:3px;justify-items:center;margin-top:2px}
+.ph-d.ok{background:var(--line)}
+.ph-d.part{background:linear-gradient(90deg,var(--line) 50%,var(--paper) 50%)}
+
+/* Title block */
+.tb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1.5px solid var(--line);background:var(--paper);min-width:0}
+.tb .f{padding:6px 10px;border-top:1px solid var(--line);min-width:0}
+.tb .f.r{border-left:1px solid var(--line)}
+.tb .f.w{grid-column:1 / -1}
+.tb .f:first-child{border-top:0}
+.tb .k{font:10.5px var(--f-mono);color:var(--muted)}
+.tb .v{font:500 14px/1.35 var(--f-cond);overflow-wrap:anywhere}
+.tb .title .v{font:600 19px/1.25 var(--f-cond)}
+.tb a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+
+/* STE word counts */
+.ste-s{display:inline}
+.wcb{font:500 9.5px var(--f-mono);color:var(--accent);margin-left:2px;vertical-align:super;line-height:0}
+.wcb.over{color:var(--warn)}
+
+/* Responsive */
+@media (max-width:899px){
+  .sheet{padding:0;border:0;background:transparent}
+  .ruler{display:none}
+  .inner{border:0;padding:0;gap:16px}
+  .flow-wrap,.legend{display:none}
+  .phases{grid-template-columns:minmax(0,1fr);gap:12px}
+  .phases::before{left:5px;right:auto;top:8px;bottom:8px;border-top:0;border-left:1px solid var(--line)}
+  .phi{grid-template-columns:11px minmax(0,1fr);justify-items:start;text-align:left;gap:0 12px}
+  .ph-d{grid-row:1;grid-column:1;margin-top:5px}
+  .ph-y{grid-column:2;line-height:20px}
+  .ph-n,.ph-g{grid-column:2;margin:0}
+  .ph-s{grid-column:2;justify-items:start;text-align:left}
+}
+@media (min-width:900px){
+  .inner{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pA,.pB,.pC,.pD,.pG,.pH,.pI,.pJ,.pT{grid-column:1 / -1}
+}
+@media (min-width:1260px){
+  .inner{grid-template-columns:repeat(12,minmax(0,1fr))}
+  .pA{grid-column:1 / -1}
+  .pB{grid-column:span 5}.pC{grid-column:span 7}
+  .pD{grid-column:span 7}.pE{grid-column:span 5}
+  .pF{grid-column:span 5}.pG{grid-column:span 7}
+  .pH{grid-column:span 7}.pI{grid-column:span 5}
+  .pJ{grid-column:span 8}.pT{grid-column:span 4}
+}
+@media (max-width:640px){
+  .tbl.stack thead{display:none}
+  .tbl.stack,.tbl.stack tbody{display:block;width:100%}
+  .tbl.stack tr{display:block;padding:8px 0;border-bottom:1px solid var(--rule)}
+  .tbl.stack td{display:grid;grid-template-columns:104px minmax(0,1fr);gap:10px;border:0;padding:2px 0;white-space:normal}
+  .tbl.stack tbody tr td,.tbl.stack tbody tr:nth-child(even) td{background:none}
+  .tbl.stack td::before{content:attr(data-label);font:10.5px/1.9 var(--f-mono);color:var(--muted)}
+  .tbl.stack td.k{display:block;font-size:14.5px;padding-bottom:4px}
+  .tbl.stack td.k::before{content:none}
+  .tbl.stack .num{display:inline-block;font:500 12px var(--f-mono);color:var(--muted);margin-right:8px}
+  #tblRules.stack td:first-child{display:none}
+  .evr{grid-template-columns:minmax(0,1fr)}
+  .evr > div{border-left:0;border-top:1px solid var(--rule)}
+  .evr > div:first-child{border-top:0}
+}
+@media (max-width:480px){
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .kpi:nth-child(3){border-left:0}
+  .kpi:nth-child(n+3){border-top:1px solid var(--rule)}
+  .kpi .v{font-size:19px}
+  .crow{grid-template-columns:minmax(0,1fr) 96px 38px}
+}
+@media (prefers-reduced-motion:reduce){
+  #flow .edge.on .ep{animation:none;stroke-dasharray:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow" data-k="ui.eyebrow"></div>
+      <h1 data-k="ui.h1"></h1>
+    </div>
+    <div class="ctrls">
+      <div class="seg" role="group" id="langseg" aria-label="Language">
+        <button type="button" id="lang-en" aria-pressed="true">EN · STE</button>
+        <button type="button" id="lang-vi" aria-pressed="false">Tiếng Việt</button>
+      </div>
+      <label class="chk" id="wc-wrap"><input type="checkbox" id="wc"> <span data-k="ui.wc"></span></label>
+    </div>
+  </header>
+
+  <div class="sheet">
+    <div class="ruler t" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+    <div class="ruler b" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+    <div class="ruler l" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span></div>
+    <div class="ruler r" aria-hidden="true"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span></div>
+
+    <div class="inner">
+      <!-- A · flow -->
+      <section class="panel pA" id="pA" aria-labelledby="pA-h">
+        <header class="ph"><span class="pl">A</span><h2 id="pA-h" data-k="pA.t"></h2><span class="pm" data-k="pA.m"></span></header>
+        <div class="pb">
+          <div class="pa-top">
+            <p class="lead" data-k="pA.lead" data-ste="d"></p>
+            <div class="seg" role="group" aria-label="Mode" id="modeseg">
+              <button type="button" data-mode="prod" aria-pressed="true" data-k="mode.prod"></button>
+              <button type="button" data-mode="dev" aria-pressed="false" data-k="mode.dev"></button>
+              <button type="button" data-mode="hold" aria-pressed="false" data-k="mode.hold"></button>
+            </div>
+          </div>
+          <figure class="fig" style="max-width:none;margin:0">
+            <div class="flow-wrap"><svg id="flow" viewBox="0 0 1540 636" role="img"></svg></div>
+            <figcaption class="legend" id="legend"></figcaption>
+          </figure>
+          <div class="player">
+            <div class="pbtns">
+              <button type="button" class="btn" id="prev"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M8.5 1 2.5 6l6 5z"/></svg><span data-k="ctl.prev"></span></button>
+              <button type="button" class="btn pri" id="play"></button>
+              <button type="button" class="btn" id="next"><span data-k="ctl.next"></span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.5 1l6 5-6 5z"/></svg></button>
+              <label class="chk"><input type="checkbox" id="voice"> <span data-k="ctl.voice"></span></label>
+            </div>
+            <p class="cap" id="cap" aria-live="polite"></p>
+          </div>
+          <ol class="steps" id="steps"></ol>
+        </div>
+      </section>
+
+      <!-- B · blocks and owners -->
+      <section class="panel pB" aria-labelledby="pB-h">
+        <header class="ph"><span class="pl">B</span><h2 id="pB-h" data-k="pB.t"></h2><span class="pm" data-k="pB.m"></span></header>
+        <div class="pb">
+          <div class="tw"><table class="tbl stack" id="tblBlocks"></table></div>
+          <p class="sub" data-k="pB.sub"></p>
+          <div class="tw"><table class="tbl stack" id="tblOwners"></table></div>
+          <p class="note" data-k="pB.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- C · modes -->
+      <section class="panel pC" aria-labelledby="pC-h">
+        <header class="ph"><span class="pl">C</span><h2 id="pC-h" data-k="pC.t"></h2><span class="pm" data-k="pC.m"></span></header>
+        <div class="pb">
+          <div class="tw"><table class="tbl" id="tblModes"></table></div>
+          <p class="note" data-k="pC.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- D · decisions -->
+      <section class="panel pD" aria-labelledby="pD-h">
+        <header class="ph"><span class="pl">D</span><h2 id="pD-h" data-k="pD.t"></h2><span class="pm" data-k="pD.m"></span></header>
+        <div class="pb">
+          <div class="tw"><table class="tbl stack" id="tblRules"></table></div>
+          <p class="note" data-k="pD.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- E · score and rule -->
+      <section class="panel pE" aria-labelledby="pE-h">
+        <header class="ph"><span class="pl">E</span><h2 id="pE-h" data-k="pE.t"></h2><span class="pm" data-k="pE.m"></span></header>
+        <div class="pb">
+          <div class="formula">score = 100 · gate · (w<sub>det</sub> · S<sub>det</sub> + w<sub>rub</sub> · S<sub>rub</sub>)</div>
+          <ul class="defs" id="defs"></ul>
+          <div class="tw"><table class="tbl" id="tblGraders"></table></div>
+          <p class="lead" data-k="pE.lead" data-ste="d"></p>
+          <figure class="fig">
+            <svg id="ruleFig" viewBox="0 0 440 200" role="img"></svg>
+            <figcaption data-k="pE.cap" data-ste="d"></figcaption>
+          </figure>
+          <ul class="rules" id="rules"></ul>
+        </div>
+      </section>
+
+      <!-- F · calculator -->
+      <section class="panel pF" aria-labelledby="pF-h">
+        <header class="ph"><span class="pl">F</span><h2 id="pF-h" data-k="pF.t"></h2><span class="pm" data-k="pF.m"></span></header>
+        <div class="pb">
+          <p class="lead" data-k="pF.lead" data-ste="d"></p>
+          <div class="presets" role="group" aria-labelledby="preset-l" id="presets">
+            <span class="sub" id="preset-l" data-k="c.preset"></span>
+            <button type="button" class="btn" data-preset="t18" aria-pressed="true" data-k="c.p.t18"></button>
+            <button type="button" class="btn" data-preset="plan" aria-pressed="false" data-k="c.p.plan"></button>
+          </div>
+          <div class="calc">
+            <div class="crow"><label for="c-n" data-k="c.n"></label><input type="range" id="c-n" min="5" max="30" step="1" value="5"><output id="o-n" for="c-n"></output></div>
+            <div class="crow"><label for="c-m" data-k="c.m"></label><input type="range" id="c-m" min="1" max="5" step="1" value="3"><output id="o-m" for="c-m"></output></div>
+            <div class="crow"><label for="c-sr" data-k="c.sr"></label><input type="range" id="c-sr" min="2" max="20" step="0.1" value="4.7"><output id="o-sr" for="c-sr"></output></div>
+            <div class="crow"><label for="c-si" data-k="c.si"></label><input type="range" id="c-si" min="0" max="15" step="1" value="5"><output id="o-si" for="c-si"></output></div>
+            <div class="crow"><label for="c-dm" data-k="c.dm"></label><input type="range" id="c-dm" min="1" max="6" step="0.5" value="3"><output id="o-dm" for="c-dm"></output></div>
+            <div class="crow"><label for="c-dt" data-k="c.dt"></label><input type="range" id="c-dt" min="4" max="12" step="0.5" value="8"><output id="o-dt" for="c-dt"></output></div>
+            <div class="crow"><label for="c-h0" data-k="c.h0"></label><input type="range" id="c-h0" min="30" max="100" step="0.1" value="94.8"><output id="o-h0" for="c-h0"></output></div>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="l" data-k="k.sd"></div><div class="v" id="v-sd"></div></div>
+            <div class="kpi"><div class="l" data-k="k.mde"></div><div class="v" id="v-mde"></div></div>
+            <div class="kpi"><div class="l" id="l-pp"></div><div class="v" id="v-pp"></div></div>
+            <div class="kpi"><div class="l" data-k="k.room"></div><div class="v" id="v-room"></div></div>
+          </div>
+          <figure class="fig">
+            <svg id="gauge" viewBox="0 0 400 124" role="img"></svg>
+          </figure>
+          <p class="verdict" id="verdict"></p>
+          <p class="verdict" id="verdict2"></p>
+          <p class="cost" id="cost"></p>
+          <p class="note" data-k="pF.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- G · guard layers -->
+      <section class="panel pG" aria-labelledby="pG-h">
+        <header class="ph"><span class="pl">G</span><h2 id="pG-h" data-k="pG.t"></h2><span class="pm" data-k="pG.m"></span></header>
+        <div class="pb">
+          <ol class="layers" id="layers"></ol>
+          <p class="note" data-k="pG.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- H · the order of the checks, with the evidence of the real-repo trial -->
+      <section class="panel pH" aria-labelledby="pH-h">
+        <header class="ph"><span class="pl">H</span><h2 id="pH-h" data-k="pH.t"></h2><span class="pm" data-k="pH.m"></span></header>
+        <div class="pb">
+          <p class="lead" data-k="pH.lead" data-ste="d"></p>
+          <ol class="layers" id="checks"></ol>
+          <p class="sub" data-k="pH.fig"></p>
+          <figure class="fig">
+            <svg id="roomFig" viewBox="0 0 440 196" role="img"></svg>
+            <figcaption data-k="pH.cap" data-ste="d"></figcaption>
+          </figure>
+          <p class="sub" data-k="pH.evr.sub"></p>
+          <div class="evr" id="evr"></div>
+          <p class="note" data-k="pH.next" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- I · code layers of the orchestrator -->
+      <section class="panel pI" aria-labelledby="pI-h">
+        <header class="ph"><span class="pl">I</span><h2 id="pI-h" data-k="pI.t"></h2><span class="pm" data-k="pI.m"></span></header>
+        <div class="pb">
+          <p class="lead" data-k="pI.lead" data-ste="d"></p>
+          <ol class="lyrs" id="lyrs"></ol>
+          <p class="sub" data-k="pI.sub"></p>
+          <div class="tw"><table class="tbl stack" id="tblHooks"></table></div>
+          <p class="note" data-k="pI.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- J · phases -->
+      <section class="panel pJ" aria-labelledby="pJ-h">
+        <header class="ph"><span class="pl">J</span><h2 id="pJ-h" data-k="pJ.t"></h2><span class="pm" data-k="pJ.m"></span></header>
+        <div class="pb">
+          <ol class="phases" id="phases"></ol>
+          <p class="note" data-k="pJ.note" data-ste="d"></p>
+        </div>
+      </section>
+
+      <!-- Title block -->
+      <div class="pT tb" id="tb"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var S = {lang:"en", mode:"prod", step:-1, playing:false, voice:false, wc:false};
+try{
+  var sl = localStorage.getItem("hfs.lang"); if(sl==="en"||sl==="vi") S.lang = sl;
+  if(localStorage.getItem("hfs.wc")==="1") S.wc = true;
+}catch(e){}
+
+/* ---------- Text. EN follows ASD-STE100 (about 80%); VI keeps its spirit: short, active, one idea per sentence. ---------- */
+var T = {
+ "ui.eyebrow":{en:"Harness Template · sheet rev 2 · 2026-11-04 · plan rev 84 · decisions to C38 · evidence to T18",
+               vi:"Harness Template · bản vẽ rev 2 · 2026-11-04 · plan rev 84 · quyết định tới C38 · bằng chứng tới T18"},
+ "ui.h1":{en:"Harness Template: flow sheet", vi:"Harness Template: bản vẽ luồng"},
+ "ui.wc":{en:"STE word counts", vi:"Đếm từ STE (chỉ tiếng Anh)"},
+
+ "pA.t":{en:"One task, end to end", vi:"Một task, từ đầu đến cuối"},
+ "pA.m":{en:"swimlane flow · 3 modes", vi:"luồng theo vai · 3 chế độ"},
+ "pA.lead":{en:"This diagram shows how the template does one task. Select a mode to see what changes. Select Play for a guided walk-through.",
+            vi:"Sơ đồ cho thấy template làm một task. Chọn chế độ để thấy phần nào thay đổi. Bấm Phát để xem từng bước."},
+ "mode.prod":{en:"Production", vi:"Production"},
+ "mode.dev":{en:"Eval · dev", vi:"Eval · dev"},
+ "mode.hold":{en:"Eval · holdout", vi:"Eval · holdout"},
+ "flow.aria":{en:"Swimlane diagram of one task. The orchestrator runs the workspace setup. The executor does a reference run with H0. Two editors propose candidates, two probe runs test them, the composer makes H′, and the executor does a composed run. The gate checks the deliverable. In production a PR opens; in eval the judge scores it. The reflector writes lessons to a staging branch, a weekly library PR merges them, and the next task reads them. H0 changes only through decision 5.",
+              vi:"Sơ đồ luồng một task. Orchestrator chạy workspace setup. Executor chạy reference run với H0. Hai editor đề xuất candidate, hai probe run thử chúng, composer tạo H′, executor chạy composed run. Gate kiểm deliverable. Ở production mở PR; ở eval judge chấm. Reflector ghi lesson vào branch staging, library PR theo tuần merge chúng, task sau đọc được. H0 chỉ đổi qua quyết định 5."},
+ "lg.dash":{en:"Dashed: optional, or a later phase", vi:"Nét đứt: tuỳ chọn, hoặc phase sau"},
+ "lg.fade":{en:"Faded: not used in this mode", vi:"Mờ: không dùng ở chế độ này"},
+ "lg.no":{en:"Number: step of the walk-through", vi:"Số: bước trong phần giải thích"},
+ "lg.hop":{en:"A small arc: one line crosses another", vi:"Cung nhỏ: hai đường cắt nhau"},
+
+ "lane.h":{en:["Thức","human"], vi:["Thức","người"]},
+ "lane.o":{en:["Orchestrator","script"], vi:["Orchestrator","script"]},
+ "lane.e":{en:["Executor","agent"], vi:["Executor","agent"]},
+ "lane.r":{en:["R roles","agents"], vi:["Vai R","agent"]},
+ "lane.s":{en:["Files","stores"], vi:["File","kho"]},
+
+ "n.h_both":{en:["Both fail","traces to Thức"], vi:["Cả hai fail","Thức nhận trace"]},
+ "n.h_pr":{en:["PR · deliverable","settled 1 time"], vi:["PR · deliverable","settle 1 lần"]},
+ "n.h_libpr":{en:["Library PR","weekly"], vi:["Library PR","theo tuần"]},
+ "n.h_promo":{en:["h0-promotion PR","Phase 5+"], vi:["PR h0-promotion","từ Phase 5"]},
+ "n.o_trig":{en:["Weak signal?","decision 1"], vi:["Tín hiệu yếu?","quyết định 1"]},
+ "n.o_trig.e":{en:["Off in eval","decision 1"], vi:["Tắt ở eval","quyết định 1"]},
+ "n.o_gate":{en:["Gate","decision 3"], vi:["Gate","quyết định 3"]},
+ "n.o_score":{en:["Score","script + judge"], vi:["Chấm điểm","script + judge"]},
+ "n.e_ref":{en:["Reference run","H0"], vi:["Reference run","H0"]},
+ "n.e_pA":{en:["Probe A","own worktree"], vi:["Probe A","worktree riêng"]},
+ "n.e_pB":{en:["Probe B","own worktree"], vi:["Probe B","worktree riêng"]},
+ "n.e_comp":{en:["Composed run","H′"], vi:["Composed run","H′"]},
+ "n.e_base":{en:["H0 baseline","m runs"], vi:["H0 baseline","m lần chạy"]},
+ "n.r_inv":{en:["Invariant editor","→ candidate A"], vi:["Invariant editor","→ candidate A"]},
+ "n.r_dom":{en:["Domain editor","→ candidate B"], vi:["Domain editor","→ candidate B"]},
+ "n.r_comp":{en:["Composer","→ H′ + ξ"], vi:["Composer","→ H′ + ξ"]},
+ "n.r_sel":{en:["Selector","k_par > 1"], vi:["Selector","k_par > 1"]},
+ "n.r_refl":{en:["Reflector","→ lessons"], vi:["Reflector","→ lesson"]},
+ "n.s_h0":{en:["H0","SHA in lock"], vi:["H0","SHA trong lock"]},
+ "n.s_runs":{en:["runs/","H′ · ξ · traces"], vi:["runs/","H′ · ξ · trace"]},
+ "n.s_eval":{en:["Eval store","outside repo"], vi:["Eval store","ngoài repo"]},
+ "n.s_branch":{en:["Staging branch","new lessons"], vi:["Branch staging","lesson mới"]},
+ "n.s_lib":{en:["Library","merged"], vi:["Library","đã merge"]},
+ "n.s_lib.h":{en:["Library","snapshot"], vi:["Library","snapshot"]},
+
+ "el.loads":{en:"loads", vi:"nạp"},
+ "el.trace":{en:"trace", vi:"trace"},
+ "el.yes":{en:"yes", vi:"có"},
+ "el.always":{en:"always", vi:"luôn chạy"},
+ "el.no":{en:"no → reference deliverable", vi:"không → deliverable của reference"},
+ "el.cand":{en:"candidates", vi:"candidate"},
+ "el.traj":{en:"trajectories", vi:"trajectory"},
+ "el.hx":{en:"H′, ξ", vi:"H′, ξ"},
+ "el.h":{en:"H′", vi:"H′"},
+ "el.deliv":{en:"deliverable", vi:"deliverable"},
+ "el.kpar":{en:"k_par > 1", vi:"k_par > 1"},
+ "el.both":{en:"both fail", vi:"cả hai fail"},
+ "el.pass":{en:"pass", vi:"pass"},
+ "el.mruns":{en:"m runs", vi:"m lần"},
+ "el.score":{en:"score", vi:"score"},
+ "el.xd":{en:"ξ, diff", vi:"ξ, diff"},
+ "el.review":{en:"review comments", vi:"comment review"},
+ "el.lessons":{en:"lessons", vi:"lesson"},
+ "el.weekly1":{en:"weekly PR", vi:"PR tuần"},
+ "el.weekly2":{en:"no task IDs", vi:"không task ID"},
+ "el.merge":{en:"merge", vi:"merge"},
+ "el.next":{en:"the next task reads it", vi:"task sau đọc"},
+ "el.snap":{en:"read-only snapshot", vi:"snapshot chỉ đọc"},
+ "el.consol":{en:"Consolidator", vi:"Consolidator"},
+ "el.h0only":{en:"H0 changes only on this line: decision 5, from Phase 5", vi:"H0 chỉ đổi theo đường này: quyết định 5, từ Phase 5"},
+ "el.gatechk":{en:"build · typecheck · test", vi:"build · typecheck · test"},
+ "el.setup":{en:"workspace_setup first", vi:"workspace_setup trước"},
+
+ "ctl.prev":{en:"Back", vi:"Lùi"},
+ "ctl.next":{en:"Next", vi:"Tiếp"},
+ "ctl.play":{en:"Play", vi:"Phát"},
+ "ctl.pause":{en:"Pause", vi:"Dừng"},
+ "ctl.voice":{en:"Voice", vi:"Giọng đọc"},
+ "cap.idle":{en:"Select Play, or select a step below.", vi:"Bấm Phát, hoặc chọn một bước bên dưới."},
+ "cap.step":{en:"Step {n} of 12", vi:"Bước {n}/12"},
+ "cap.novoice":{en:"This browser has no voice for this language, so the walk-through shows text only.", vi:"Trình duyệt này không có giọng tiếng Việt, nên phần giải thích chỉ hiện chữ."},
+
+ /* steps */
+ "s1.t":{en:"Reference run", vi:"Reference run"},
+ "s1.x":{en:"The orchestrator makes a workspace and runs the workspace_setup commands, for example a clone of node_modules. Then it opens one executor session with H0 from the locked SHA. The executor does the task. This is the reference run.",
+         vi:"Orchestrator tạo workspace và chạy các lệnh workspace_setup, ví dụ clone node_modules. Sau đó nó mở một session executor với H0 lấy từ SHA trong lock. Executor làm task. Đây là reference run."},
+ "s2.t":{en:"Decision 1: improve this task?", vi:"Quyết định 1: có cải tiến không?"},
+ "s2.x.p":{en:"The orchestrator reads the reference trace. A weak signal is a failed check, three or more tool errors, too many steps, or no self-check. With no weak signal, the reference deliverable goes to the gate.",
+           vi:"Orchestrator đọc trace của reference. Tín hiệu yếu là: check fail, từ 3 tool error trở lên, quá nhiều bước, hoặc executor không tự kiểm. Không có tín hiệu yếu thì deliverable của reference đi thẳng tới gate."},
+ "s2.x.e":{en:"In eval, the orchestrator does not use this decision. Every task goes through the full loop. If you improve only weak tasks and compare them with the same weak run, you get a false gain.",
+           vi:"Ở eval, orchestrator bỏ qua quyết định này. Mọi task chạy đủ vòng. Chỉ cải tiến task tệ rồi so với chính lần chạy tệ đó sẽ cho gain giả."},
+ "s3.t":{en:"Propose", vi:"Propose"},
+ "s3.x":{en:"Two editors read the task, H0, the reference trajectory and the merged library. The invariant editor changes rules for all tasks. The domain editor changes rules for this type of task. Their first prompt gives the growth limit in bytes and the bytes that are left.",
+         vi:"Hai editor đọc task, H0, trajectory của reference và library đã merge. Invariant editor sửa luật đúng cho mọi task. Domain editor sửa luật cho loại task này. Prompt đầu tiên nêu growth limit theo byte và số byte còn thêm được."},
+ "s4.t":{en:"Probe", vi:"Probe"},
+ "s4.x":{en:"The orchestrator copies each candidate into its own worktree. The executor does the same task with each candidate. These are the probe runs.",
+         vi:"Orchestrator chép mỗi candidate vào một worktree riêng. Executor làm lại cùng task với từng candidate. Đây là các probe run."},
+ "s5.t":{en:"Compose", vi:"Compose"},
+ "s5.x":{en:"The composer compares the probe trajectories with the reference trajectory. It keeps an edit only when a trajectory shows its effect. It writes H′ and the step record ξ to runs/.",
+         vi:"Composer so trajectory của các probe với trajectory của reference. Nó chỉ giữ edit khi trajectory cho thấy tác dụng. Nó ghi H′ và step record ξ vào runs/."},
+ "s6.t":{en:"Composed run", vi:"Composed run"},
+ "s6.x":{en:"The executor does the task again with H′. This is the composed run.",
+         vi:"Executor làm task lần nữa với H′. Đây là composed run."},
+ "s7.t":{en:"Select, only when k_par > 1", vi:"Chọn, chỉ khi k_par > 1"},
+ "s7.x":{en:"When k_par is more than 1, the selector compares the deliverables without their source names. It reads the task again before it selects. With k_par = 1, this step does not occur.",
+         vi:"Khi k_par lớn hơn 1, selector so các deliverable đã ẩn nguồn. Nó đọc lại task trước khi chọn. Với k_par = 1, bước này không chạy."},
+ "s8.t":{en:"Gate", vi:"Gate"},
+ "s8.x":{en:"The gate runs build, typecheck and test. If the composed deliverable fails, the reference deliverable goes forward. If both fail, no PR opens and Thức gets the two traces.",
+         vi:"Gate chạy build, typecheck và test. Nếu composed deliverable fail, deliverable của reference đi tiếp. Nếu cả hai fail, không mở PR và Thức nhận hai trace."},
+ "s8.x.e":{en:"The gate runs build, typecheck and test. If the composed deliverable fails, the reference deliverable goes forward. The score uses this gate result, and the gate does not run again.",
+           vi:"Gate chạy build, typecheck và test. Nếu composed deliverable fail, deliverable của reference đi tiếp. Score dùng chính kết quả gate này, gate không chạy lại."},
+ "s9.t.p":{en:"Output: a PR", vi:"Output: một PR"},
+ "s9.t.e":{en:"Output: a score", vi:"Output: một score"},
+ "s9.x.p":{en:"The orchestrator opens a pull request with the deliverable only. Thức settles it one time. H′ stays in runs/ and does not go into H0.",
+           vi:"Orchestrator mở PR chỉ chứa deliverable. Thức settle PR đúng một lần. H′ nằm lại trong runs/, không vào H0."},
+ "s9.x.e":{en:"The script and the judge score the deliverable and m independent H0 runs. The scores go to the eval store. No agent sees a score.",
+           vi:"Script và judge chấm deliverable và m lần chạy H0 độc lập. Score vào eval store. Không agent nào thấy score."},
+ "s10.t":{en:"Reflect", vi:"Reflect"},
+ "s10.x.p":{en:"After the review, the reflector reads ξ, the diff and the review comments. It writes lessons to the staging branch. It never reads a score.",
+            vi:"Sau review, reflector đọc ξ, diff và comment review. Nó ghi lesson vào branch staging. Nó không bao giờ đọc score."},
+ "s10.x.d":{en:"The reflector reads ξ and the diff before the judge gives a score. It writes lessons to the staging branch. It never reads a score.",
+            vi:"Reflector đọc ξ và diff trước khi judge chấm. Nó ghi lesson vào branch staging. Nó không bao giờ đọc score."},
+ "s10.x.h":{en:"On holdout tasks, the reflector does not run. The library cannot learn from the test.",
+            vi:"Với task holdout, reflector không chạy. Library không được học từ chính đề thi."},
+ "s11.t":{en:"Library PR", vi:"Library PR"},
+ "s11.x":{en:"Each week, the orchestrator opens one library pull request without task IDs. Thức reviews it before he opens the eval reports of the same week.",
+          vi:"Mỗi tuần, orchestrator mở một library PR không có task ID. Thức duyệt nó trước khi mở eval report của cùng tuần."},
+ "s11.x.h":{en:"Holdout tasks make no library pull request. The library stays a read-only snapshot for the full holdout round.",
+            vi:"Task holdout không sinh library PR. Library là snapshot chỉ đọc trong suốt đợt holdout."},
+ "s12.t":{en:"The next task, and H0", vi:"Task sau, và H0"},
+ "s12.x":{en:"After the merge, the next task reads the new lessons. H0 changes only through decision 5, and only from Phase 5.",
+          vi:"Sau khi merge, task sau đọc được lesson mới. H0 chỉ đổi qua quyết định 5, và chỉ từ Phase 5."},
+ "s12.x.h":{en:"Each holdout task reads the same library snapshot. H0 changes only through decision 5, and only from Phase 5.",
+            vi:"Mọi task holdout đọc cùng một snapshot library. H0 chỉ đổi qua quyết định 5, và chỉ từ Phase 5."},
+
+ /* B */
+ "pB.t":{en:"Four blocks, three owners", vi:"Bốn khối, ba lớp owner"},
+ "pB.m":{en:"what changes what", vi:"cái gì đổi cái gì"},
+ "pB.sub":{en:"Owner prefix in the file name", vi:"Owner nằm trong tên file"},
+ "pB.note":{en:"Some file names come from the tool, for example CLAUDE.md and .claude/settings.json. The template treats these files as pinned, without the prefix. Pinned files are not part of H0.",
+            vi:"Một số tên file do tool đặt, ví dụ CLAUDE.md và .claude/settings.json. Các file này là pinned dù không có tiền tố. File pinned không thuộc H0."},
+ "tb.blocks.h":{en:["Block","What it is","Where","Changes only through"], vi:["Khối","Là gì","Ở đâu","Chỉ đổi qua"]},
+ "tb.blocks":{en:[
+    ["H0","Execution harness: the instructions, rules, skills and subagents of the executor","project: CLAUDE.md block, harness/*.md, .claude/skills/, .claude/agents/ at h0_sha","h0-promotion PR, decision 5"],
+    ["R","Improvement harness: the agent roles, and the orchestrator that runs them","plugin and orchestrator, fixed during a task","upgrade PR"],
+    ["Library","Lessons, each with a patch and its evidence","project: harness/library/","weekly library PR"],
+    ["Eval store","Eval tasks (task.md, base_sha, rubric.md, meta.yaml, hidden-tests/, solution/), the judge prompt, weights and scores","private repo, outside the project","Thức only. No agent can read it."]],
+   vi:[
+    ["H0","Execution harness: instruction, luật, skill và subagent của executor","project: khối trong CLAUDE.md, harness/*.md, .claude/skills/, .claude/agents/ tại h0_sha","PR h0-promotion, quyết định 5"],
+    ["R","Improvement harness: các vai agent và orchestrator chạy chúng","plugin và orchestrator, cố định trong một task","PR upgrade"],
+    ["Library","Lesson, mỗi lesson kèm patch và evidence","project: harness/library/","library PR theo tuần"],
+    ["Eval store","Eval task (task.md, base_sha, rubric.md, meta.yaml, hidden-tests/, solution/), prompt của judge, weights và score","repo private, ngoài project","Chỉ Thức. Không agent nào đọc được."]]},
+ "tb.own.h":{en:["Class","Example","Who writes","Into main through"], vi:["Lớp","Ví dụ","Ai ghi","Vào main qua"]},
+ "tb.own":{en:[
+    ["pinned-","pinned-config.yaml","Thức only","PR with the owner-change label"],
+    ["loop-owned","instructions.md, skills/","the loop proposes","h0-promotion PR"],
+    ["task code","src/**","executor","PR deliverable"]],
+   vi:[
+    ["pinned-","pinned-config.yaml","Chỉ Thức","PR có label owner-change"],
+    ["loop-owned","instructions.md, skills/","vòng lặp đề xuất","PR h0-promotion"],
+    ["code của task","src/**","executor","PR deliverable"]]},
+
+ /* C */
+ "pC.t":{en:"Two run modes", vi:"Hai chế độ chạy"},
+ "pC.m":{en:"the mode in A selects a column", vi:"chế độ ở A tô sáng một cột"},
+ "pC.note":{en:"Both modes use the same R and the same stage prompts. Only the rows above change.",
+            vi:"Hai chế độ dùng cùng R và cùng stage prompt. Chỉ các dòng trên là khác."},
+ "tb.modes.h":{en:["","Production","Eval"], vi:["","Production","Eval"]},
+ "tb.modes":{en:[
+    ["Task","A real task without an answer","A finished task with hidden tests, a rubric and a solution"],
+    ["Ruler check","harness doctor","harness eval-check, then harness doctor. The solution of each task passes the gate and each hidden test"],
+    ["Decision 1","On: improve only on a weak signal","Off: every task goes through the full loop"],
+    ["Baseline","None","m independent H0 runs, never the reference run"],
+    ["Workspace","Worktree from the H0 SHA in the lock, then workspace_setup","git archive at base_sha: no history, no remote, no WebFetch. Then workspace_setup"],
+    ["Gate result","Selects the deliverable for the PR","Selects the deliverable. The score uses the same result"],
+    ["Output","PR with the deliverable only","Score report in the eval store, no PR"],
+    ["Reflect","After Thức reviews; reads the comments","Dev: before the judge scores. Holdout: off"],
+    ["Library","The merged version","Dev: the merged version. Holdout: a read-only snapshot"]],
+   vi:[
+    ["Task","Task thật, chưa có lời giải","Task đã xong, có test ẩn, rubric và lời giải"],
+    ["Kiểm thước đo","harness doctor","harness eval-check, rồi harness doctor. Lời giải của mỗi task pass gate và mọi test ẩn"],
+    ["Quyết định 1","Bật: chỉ cải tiến khi có tín hiệu yếu","Tắt: mọi task chạy đủ vòng"],
+    ["Baseline","Không cần","m lần chạy H0 độc lập, không bao giờ là reference run"],
+    ["Workspace","Worktree từ SHA của H0 trong lock, rồi workspace_setup","git archive tại base_sha: không history, không remote, không WebFetch. Rồi workspace_setup"],
+    ["Kết quả gate","Chọn deliverable cho PR","Chọn deliverable. Score dùng lại kết quả này"],
+    ["Output","PR chỉ chứa deliverable","Report có score trong eval store, không PR"],
+    ["Reflect","Sau khi Thức review; đọc comment","Dev: trước khi judge chấm. Holdout: tắt"],
+    ["Library","Bản đã merge","Dev: bản đã merge. Holdout: snapshot chỉ đọc"]]},
+
+ /* D */
+ "pD.t":{en:"Who decides what", vi:"Ai quyết định gì"},
+ "pD.m":{en:"decisions 1–6", vi:"quyết định 1–6"},
+ "pD.note":{en:"The improver never asks the judge and never gets a score. Only decisions 5 and 6 use scores. For decision 2, budget.tokens counts cache reads. A report names each arm that the budget stopped in more than 5% of its runs.",
+            vi:"Improver không bao giờ hỏi judge và không nhận score. Chỉ quyết định 5 và 6 dùng score. Với quyết định 2, budget.tokens tính cả cache read. Report nêu tên arm bị budget dừng ở hơn 5% số run."},
+ "tb.rules.h":{en:["#","Decision","Who","Rule","From"], vi:["#","Quyết định","Ai","Rule","Từ"]},
+ "tb.rules":{en:[
+    ["1","Improve this task?","Orchestrator","Production: only on a weak signal in the reference trace. Eval: always.","Phase 2"],
+    ["2","Stop the loop","Orchestrator","Stop after k_seq steps or at the budget limit. A score never stops the loop.","Phase 2"],
+    ["3","Select the output","Composer, selector","Keep an edit only with an observed contrast. If the composed run fails the gate, use the reference.","Phase 2"],
+    ["4","Add a lesson","Reflector, then Thức","No contrast, no lesson. A lesson that rests only on confounded rows becomes narrower, or it goes out.","Phase 3"],
+    ["5","Change H0","Consolidator, script, Thức","Pass on E2 in holdout, inside the growth limit and the budget.","Phase 5"],
+    ["6","Roll back","Thức","A Worse result on holdout: go back to the last snapshot that passed.","Phase 5"]],
+   vi:[
+    ["1","Có cải tiến task này?","Orchestrator","Production: chỉ khi trace của reference có tín hiệu yếu. Eval: luôn chạy.","Phase 2"],
+    ["2","Dừng vòng lặp","Orchestrator","Dừng sau k_seq bước hoặc khi chạm budget. Score không bao giờ dừng vòng lặp.","Phase 2"],
+    ["3","Dùng output nào","Composer, selector","Chỉ giữ edit có contrast quan sát được. Composed run fail gate thì dùng reference.","Phase 2"],
+    ["4","Thêm lesson","Reflector, rồi Thức","Không có contrast thì không ghi. Lesson chỉ dựa trên row confounded thì thu hẹp hoặc bỏ.","Phase 3"],
+    ["5","Đổi H0","Consolidator, script, Thức","Pass ở E2 trên holdout, trong growth limit và budget.","Phase 5"],
+    ["6","Rollback","Thức","Kết quả Tệ hơn trên holdout: quay về snapshot gần nhất đã pass.","Phase 5"]]},
+
+ /* E */
+ "pE.t":{en:"Score, and the rule to adopt", vi:"Score, và rule để adopt"},
+ "pE.m":{en:"one deliverable · one comparison", vi:"một deliverable · một phép so"},
+ "pE.defs":{en:["gate: 1 if build and typecheck pass, 0 if not.","S_det: hidden tests, lint, bundle size and load time, from 0 to 1. A part with no measurement drops out, and the weights of the other parts scale up.","S_rub: a weighted rubric that the LLM judge scores. Start weights: 0.5 and 0.5.","Example, c4 (T9): hidden tests 17 of 17, lint passes, the judge fails the criterion tests. Score: 90."],
+            vi:["gate: 1 nếu build và typecheck pass, 0 nếu không.","S_det: test ẩn, lint, bundle size và load time, từ 0 tới 1. Phần không đo thì bỏ ra, và trọng số của các phần còn lại tự chia lại.","S_rub: rubric có trọng số do LLM judge chấm. Trọng số khởi điểm: 0.5 và 0.5.","Ví dụ c4 (T9): test ẩn 17/17, lint pass, judge fail tiêu chí tests. Score: 90."]},
+ "tb.grad.h":{en:["Grader","Scores","Property"], vi:["Người chấm","Chấm gì","Tính chất"]},
+ "tb.grad":{en:[["Script","gate, S_det","The same input gives the same result"],["LLM judge","S_rub","One call, no tools, another model"],["Thức","calibration, settle","Judge target: κ ≥ 0.6 and 8 of 10 pairs. No calibration yet"]],
+            vi:[["Script","gate, S_det","Cùng input, cùng kết quả"],["LLM judge","S_rub","Một lần gọi, không tool, model khác"],["Thức","calibrate, settle","Judge phải đạt κ ≥ 0.6 và 8/10 cặp. Chưa calibrate"]]},
+ "pE.lead":{en:"For each task t, d_t is the new mean score minus the old mean score, over m runs in each arm.",
+            vi:"Với mỗi task t, d_t là score trung bình của nhánh mới trừ nhánh cũ, qua m lần chạy mỗi nhánh."},
+ "pE.cap":{en:"Each bar is an 80% interval. Its two ends are the one-sided 90% bounds. Here δ_min = 3.",
+           vi:"Mỗi thanh là khoảng 80%. Hai đầu là cận one-sided 90%. Ở đây δ_min = 3."},
+ "pE.axis":{en:["mean of d_t","(points)"], vi:["mean của d_t","(điểm)"]},
+ "pE.lbl":{en:["Pass","Inconclusive","Fail","Worse"], vi:["Pass","Chưa kết luận","Fail","Tệ hơn"]},
+ "pE.rules":{en:[["Pass","The lower 90% bound is above 0, and the mean is δ_min or more."],["Fail","The upper 90% bound is below δ_min."],["Worse","The upper 90% bound is below 0. Rollback uses this result."],["Inconclusive","All other results. Only Pass adopts a change."]],
+             vi:[["Pass","Cận dưới 90% lớn hơn 0, và mean từ δ_min trở lên."],["Fail","Cận trên 90% nhỏ hơn δ_min."],["Tệ hơn","Cận trên 90% nhỏ hơn 0. Rollback dùng kết quả này."],["Chưa kết luận","Mọi trường hợp còn lại. Chỉ Pass mới adopt."]]},
+
+ /* F */
+ "pF.t":{en:"Size the eval set", vi:"Định cỡ eval set"},
+ "pF.m":{en:"MDE80 · live simulation", vi:"MDE80 · mô phỏng trực tiếp"},
+ "pF.lead":{en:"MDE80 is the smallest gain that the rule finds in 80% of rounds. Move the controls to see the effect.",
+            vi:"MDE80 là gain nhỏ nhất mà rule phát hiện được ở 80% số đợt. Kéo thanh trượt để thấy tác động."},
+ "c.n":{en:"Holdout tasks, n", vi:"Task holdout, n"},
+ "c.m":{en:"Runs in each arm, m", vi:"Lần chạy mỗi nhánh, m"},
+ "c.sr":{en:"σ_run, noise between runs", vi:"σ_run, nhiễu giữa các lần chạy"},
+ "c.si":{en:"σ_int, task × harness", vi:"σ_int, task × harness"},
+ "c.dm":{en:"δ_min, smallest gain to adopt", vi:"δ_min, gain tối thiểu để adopt"},
+ "c.dt":{en:"δ_target, goal for MDE80", vi:"δ_target, mục tiêu cho MDE80"},
+ "k.sd":{en:"SD of d_t", vi:"SD của d_t"},
+ "k.mde":{en:"MDE80 (points)", vi:"MDE80 (điểm)"},
+ "c.h0":{en:"Mean H0 score", vi:"Score H0 trung bình"},
+ "c.preset":{en:"Values", vi:"Bộ giá trị"},
+ "c.p.t18":{en:"Real-repo trial, T18", vi:"Thử trên repo thật, T18"},
+ "c.p.plan":{en:"Plan example", vi:"Ví dụ của plan"},
+ "k.pp":{en:"P(Pass), true gain {g}", vi:"P(Pass), gain thật {g}"},
+ "k.room":{en:"Room (points)", vi:"Khoảng trống (điểm)"},
+ "g.room":{en:"room", vi:"khoảng trống"},
+ "v.room.ok":{en:"Room {r} > MDE80 {m}. A round on this task set can find a gain of MDE80 or more.",
+              vi:"Khoảng trống {r} > MDE80 {m}. Một đợt trên bộ task này có thể tìm được gain từ MDE80 trở lên."},
+ "v.room.no":{en:"Room {r} ≤ MDE80 {m}. No round on this task set can pass, even with a perfect harness. Find tasks where H0 scores 30 to 85.",
+              vi:"Khoảng trống {r} ≤ MDE80 {m}. Không đợt nào trên bộ task này pass được, dù harness hoàn hảo. Tìm task mà H0 đạt 30–85."},
+ "g.paper":{en:"paper, k = 1: 1.2 to 11.8, median 4", vi:"paper, k = 1: 1.2 tới 11.8, trung vị 4"},
+ "g.mde":{en:"MDE80", vi:"MDE80"},
+ "g.target":{en:"δ_target", vi:"δ_target"},
+ "v.ok":{en:"MDE80 ≤ δ_target. With these values, the Phase 0 gate passes.", vi:"MDE80 ≤ δ_target. Với các giá trị này, gate Phase 0 pass."},
+ "v.no":{en:"MDE80 > δ_target. Add holdout tasks, or write that Success 1 can find only gains of MDE80 or more.", vi:"MDE80 > δ_target. Thêm task holdout, hoặc ghi rõ Success 1 chỉ kiểm chứng được gain từ MDE80 trở lên."},
+ "v.cost":{en:"One holdout round: {r} rollouts, {s} R sessions, {j} judge calls.", vi:"Một đợt holdout: {r} rollout, {s} session R, {j} lần gọi judge."},
+ "pF.note":{en:"The page simulates 20 000 rounds with a fixed seed: a paired one-sided t test, α = 0.10. Phase 0 cannot measure σ_int, so it reports three levels: 0, 5 and 10. One more run cuts only the σ_run part. One more task cuts both parts. Room is 100 minus the mean H0 score. The true gain cannot be larger than the room, so P(Pass) uses the smaller of 4 and the room. The plan example uses a mean H0 of 60, inside the plan range of 30 to 85.",
+            vi:"Trang mô phỏng 20 000 đợt với seed cố định: paired t one-sided, α = 0.10. Phase 0 chưa đo được σ_int, nên báo ở ba mức 0, 5 và 10. Thêm run chỉ giảm phần σ_run. Thêm task giảm cả hai phần. Khoảng trống là 100 trừ score H0 trung bình. Gain thật không thể lớn hơn khoảng trống, nên P(Pass) dùng giá trị nhỏ hơn giữa 4 và khoảng trống. Ví dụ của plan dùng H0 trung bình 60, trong khoảng 30–85 của plan."},
+
+ /* G */
+ "pG.t":{en:"Five guard layers", vi:"Năm lớp rào"},
+ "pG.m":{en:"layers 1 and 5 have authority", vi:"lớp 1 và 5 có thẩm quyền"},
+ "pG.tag":{en:["Authority","Local backup"], vi:["Có thẩm quyền","Phòng thủ local"]},
+ "pG.rows":{en:[
+    ["Eval out of reach","a","Holdout rounds run the executor in a container without the eval store. Local runs block reads outside the working directory."],
+    ["Explicit launch","l","The orchestrator builds each session: role settings, the locked plugin, no auto memory and no GH_TOKEN. The credential is ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN."],
+    ["Role rules and hooks","l","Deny rules stay in the role settings, not in the project. A hook lets each role write only to its own paths."],
+    ["Strict sandbox","l","Bash cannot write to pinned-, loop-owned, runs/ or library/ paths. On Linux, each glob becomes a full path."],
+    ["CI on the base branch","a","A PR cannot change its own gate. A PR that touches a pinned- path needs a human author and a label. harness upgrade proposes new CI guard copies when the plugin changes."]],
+   vi:[
+    ["Eval ngoài tầm đọc","a","Đợt holdout chạy executor trong container không có eval store. Chạy local thì chặn đọc ngoài working directory."],
+    ["Launch tường minh","l","Orchestrator tự dựng mọi session: settings theo vai, plugin đúng lock, tắt auto memory, không GH_TOKEN. Credential là ANTHROPIC_API_KEY hoặc CLAUDE_CODE_OAUTH_TOKEN."],
+    ["Rule và hook theo vai","l","Deny rule nằm trong settings theo vai, không nằm trong project. Hook chỉ cho mỗi vai ghi vào path của nó."],
+    ["Sandbox strict","l","Bash không ghi được vào path pinned-, loop-owned, runs/ hay library/. Trên Linux, mỗi glob thành path đầy đủ."],
+    ["CI chạy từ base branch","a","PR không tự sửa được gate của nó. PR chạm path pinned- phải do người tạo và có label. harness upgrade đề xuất bản CI guard mới khi plugin đổi."]]},
+ "pG.note":{en:"The doctor tries each bypass. It passes only when a guard blocks or detects each bypass. Evidence: on Linux, the guard blocked 13 of 13 live attacks (L11). On macOS, it blocked 14 of 14 in the self-test (T6). Nobody ran the live check on macOS yet.",
+            vi:"Doctor thử từng đường lách. Nó chỉ pass khi mọi đường lách bị chặn hoặc bị phát hiện. Bằng chứng: trên Linux, guard chặn 13/13 đòn live (L11). Trên macOS, guard chặn 14/14 ở self-test (T6). Chưa ai chạy bản live trên macOS."},
+
+ /* H */
+ "pH.t":{en:"Measure before you improve", vi:"Đo trước khi cải tiến"},
+ "pH.m":{en:"check order · Real-repo trial, 2026-10-26 to 28", vi:"thứ tự kiểm · thử trên repo thật, 26–28/10"},
+ "pH.lead":{en:"Do the checks in this order. Each check costs less than the next one. Stop at the first check that fails.",
+            vi:"Kiểm theo đúng thứ tự này. Bước trước rẻ hơn bước sau. Dừng ở bước đầu tiên fail."},
+ "pH.rows":{en:[
+    ["Ruler check","harness eval-check","ok","Pass","For each task, the gate and the hidden tests fail at base and pass on solution/. It uses 0 tokens and about 2 minutes for each task. Trial: 11 of 12 OK. The solution of L1 failed the lint of the project. After a fix: 12 of 12 (T17)."],
+    ["Guard check","harness doctor","ok","Pass","Static checks and the guard self-test. Trial on macOS: 0 FAIL, and the guard blocked 14 of 14 attacks (T6)."],
+    ["Noise","harness measure","ok","Pass","Frozen H0, 3 runs on each of 7 dev tasks. σ_run = 4.7, and MDE80 = 6.9 at 5 holdout tasks. 6.9 ≤ δ_target 8, so the Phase 0 gate passes. Cost: 58 minutes, 5.5 million tokens, $4.71 (T18)."],
+    ["Room","100 − mean H0 > MDE80","stop","Stop","A round cannot find a gain larger than the room. Trial: 100 − 94.8 = 5.2, less than 6.9. The trial stops on this task set. No command does this check yet."],
+    ["E1 round","harness eval --split dev","part","1 task only","The loop against frozen H0 on the same task. The loop reads the trace of that task and tries again. So E1 shows the value of a second try. It does not show a better harness. Trial on c4: d_t = 10, then 0. H0 alone gave 90, 90 and 100 (T13–T15)."],
+    ["E2 round","harness eval --h0-prime <ref>","no","Not run","A frozen H0′ against H0 on holdout tasks that H0′ never saw. Only this result shows a better harness. Decision 5 uses it, from Phase 5."]],
+   vi:[
+    ["Kiểm thước đo","harness eval-check","ok","Pass","Với mỗi task, gate và test ẩn fail ở base và pass trên solution/. 0 token, khoảng 2 phút mỗi task. Thử: 11/12 OK. Lời giải của L1 fail lint của project. Sửa xong: 12/12 (T17)."],
+    ["Kiểm guard","harness doctor","ok","Pass","Check tĩnh và guard self-test. Thử trên macOS: 0 FAIL, guard chặn 14/14 đòn (T6)."],
+    ["Đo nhiễu","harness measure","ok","Pass","H0 đông cứng, 3 run mỗi task, 7 task dev. σ_run = 4.7, MDE80 = 6.9 ở 5 task holdout. 6.9 ≤ δ_target 8, nên gate Phase 0 pass. Chi phí: 58 phút, 5.5 triệu token, $4.71 (T18)."],
+    ["Khoảng trống","100 − H0 trung bình > MDE80","stop","Dừng","Không đợt nào tìm được gain lớn hơn khoảng trống. Thử: 100 − 94.8 = 5.2, nhỏ hơn 6.9. Dừng vòng lặp trên bộ task này. Chưa có lệnh nào tự kiểm bước này."],
+    ["Đợt E1","harness eval --split dev","part","Mới 1 task","Vòng lặp so với H0 đông cứng trên cùng task. Vòng lặp đọc trace của chính task đó rồi làm lại. Nên E1 đo giá trị của lần thử thứ hai. Nó không đo harness tốt lên. Thử trên c4: d_t = 10, rồi 0. Riêng H0 đã cho 90, 90 và 100 (T13–T15)."],
+    ["Đợt E2","harness eval --h0-prime <ref>","no","Chưa chạy","H0′ đông cứng so với H0 trên task holdout mà H0′ chưa từng thấy. Chỉ kết quả này chứng minh harness tốt lên. Quyết định 5 dùng nó, từ Phase 5."]]},
+ "pH.fig":{en:"H0 score of each dev task, mean of 3 runs (T18)", vi:"Score H0 của từng task dev, trung bình 3 run (T18)"},
+ "pH.line":{en:"100 − MDE80 = 93.1", vi:"100 − MDE80 = 93.1"},
+ "pH.mean":{en:"mean", vi:"trung bình"},
+ "pH.cap":{en:"A dot right of the dashed line has less room than MDE80: 5 of 7 tasks. Hidden tests passed in 21 of 21 runs. The lint of the project took points in 6 of 21 runs. The judge criterion tests took points in 4 of 21 runs.",
+           vi:"Chấm nằm bên phải vạch đứt có khoảng trống nhỏ hơn MDE80: 5/7 task. Test ẩn pass ở 21/21 run. Điểm mất đến từ lint của project (6/21 run) và tiêu chí tests của judge (4/21 run)."},
+ "pH.evr.sub":{en:"Encode · Verify · Retro", vi:"Encode · Verify · Retro"},
+ "pH.evr":{en:[
+    ["Verify","kernel","ok","Measured","The guard, eval-check and measure work on a real repo."],
+    ["Retro","loop","part","Runs, no gain shown","One pipeline run: 8 to 11 sessions, 1.2 million tokens, 8 to 9 minutes. This task set has no room for a gain."],
+    ["Encode","H0","no","Almost empty","In the trial, H0 had the scaffold text only: about 1.5 KB and no skill."]],
+   vi:[
+    ["Verify","kernel","ok","Đã đo","Guard, eval-check và measure chạy được trên repo thật."],
+    ["Retro","loop","part","Chạy được, chưa thấy gain","Một run pipeline: 8–11 session, 1.2 triệu token, 8–9 phút. Bộ task này không còn chỗ cho gain."],
+    ["Encode","H0","no","Gần như rỗng","Trong lần thử, H0 chỉ có text của scaffold: khoảng 1.5 KB, không có skill."]]},
+ "pH.next":{en:"Next, for Thức to decide: a new eval set from merged PRs where H0 scores 30 to 85. Proposal: Thức writes 3 to 5 skills by hand as H0′. Then an E2 round compares H0′ with H0. Automatic skill generation waits for an E2 Pass.",
+            vi:"Tiếp theo, Thức quyết định: eval set mới từ PR đã merge, nơi H0 đạt 30–85. Đề xuất: Thức tự viết 3–5 skill làm H0′. Sau đó một đợt E2 so H0′ với H0. Tự sinh skill chờ tới khi E2 Pass."},
+
+ /* I */
+ "pI.t":{en:"Code layers of the orchestrator", vi:"Các tầng code của orchestrator"},
+ "pI.m":{en:"ARCHITECTURE.md · C38", vi:"ARCHITECTURE.md · C38"},
+ "pI.lead":{en:"Each layer can import only the layers below it. npm test runs scripts/check-layers.mjs first, so a bad import fails CI.",
+            vi:"Mỗi tầng chỉ được import các tầng bên dưới nó. npm test chạy scripts/check-layers.mjs trước, nên import sai làm CI fail."},
+ "pI.arrow":{en:"↓ imports", vi:"↓ import"},
+ "pI.lines":{en:"{n} lines", vi:"{n} dòng"},
+ "pI.rows":{en:[
+    ["cli.ts","src/cli.ts","","","The composition root. Only this file connects the layers, and it gives the hooks.",367],
+    ["extras","src/extras/","no","No evidence","Parts that wait for a gain: the lesson store, the dashboard and the library.",1526],
+    ["loop","src/loop/","part","Runs, no gain yet","The improvement loop: editors, probes, composer and the E1 round.",723],
+    ["kernel","src/kernel/","ok","Measured","Run a fixed harness in a safe session, and measure the result.",4398],
+    ["util","src/util/","","","Process and file helpers.",204]],
+   vi:[
+    ["cli.ts","src/cli.ts","","","Gốc lắp ráp. Chỉ file này nối các tầng, và nó truyền hook.",367],
+    ["extras","src/extras/","no","Chưa có bằng chứng","Phần chờ có gain: lesson store, dashboard và library.",1526],
+    ["loop","src/loop/","part","Chạy được, chưa có gain","Vòng cải tiến: editor, probe, composer và đợt E1.",723],
+    ["kernel","src/kernel/","ok","Đã đo","Chạy một harness cố định trong session an toàn, rồi đo kết quả.",4398],
+    ["util","src/util/","","","Helper cho process và file.",204]]},
+ "pI.sub":{en:"Hooks: a lower layer calls a higher layer through them", vi:"Hook: tầng dưới gọi tầng trên qua đây"},
+ "tb.hooks.h":{en:["Hook","Declared in","The CLI gives"], vi:["Hook","Khai báo ở","CLI truyền vào"]},
+ "tb.hooks":{en:[
+    ["Deps.onRunEnd","kernel/run.ts","captureEpisode from extras/episode.ts"],
+    ["RoundDeps.reflect","loop/round.ts","reflect from extras/library.ts, before the score exists"],
+    ["dashboardPath","kernel/measure.ts, loop/round.ts","refreshDashboard from extras/bench.ts, after the command"]],
+   vi:[
+    ["Deps.onRunEnd","kernel/run.ts","captureEpisode từ extras/episode.ts"],
+    ["RoundDeps.reflect","loop/round.ts","reflect từ extras/library.ts, trước khi có score"],
+    ["dashboardPath","kernel/measure.ts, loop/round.ts","refreshDashboard từ extras/bench.ts, sau lệnh"]]},
+ "pI.note":{en:"Freeze rule: no new feature in loop or extras until an E2 round passes. A fix that makes a measurement possible can go in. A new layer or a new hook needs a line in ARCHITECTURE.md.",
+            vi:"Luật đóng băng: không thêm tính năng vào loop hay extras cho tới khi một đợt E2 pass. Bản sửa giúp đo được thì vẫn vào. Tầng mới hay hook mới phải có một dòng trong ARCHITECTURE.md."},
+
+ /* J */
+ "pJ.t":{en:"Phases and gates", vi:"Các phase và gate"},
+ "pJ.m":{en:"a phase ends when it passes its gate · status on 2026-11-04", vi:"phase kết thúc khi qua gate · trạng thái 04/11"},
+ "pJ.rows":{en:[
+    ["Measure first","MDE80 ≤ δ_target. The judge reaches κ ≥ 0.6 and 8 of 10 pairs.","part","Half","MDE80 6.9 ≤ 8 on the trial. No judge calibration yet."],
+    ["H0 headless","Each dev task has a trace and a score. The doctor passes each probe.","part","Half","21 of 21 runs have a trace and a score. No live doctor on macOS yet."],
+    ["One contrastive step","The loop completes on each dev task. The gate fails if E1 on dev is Worse.","part","Started","The loop ran on 1 task. E1 needs 2 or more tasks."],
+    ["Library and reflection","The library estimate is −δ_min or more on holdout. Reuse is 20% or more.","no","Frozen","The code exists. It waits for an E2 Pass."],
+    ["Package and onboard","A second person starts a new project from the README only.","no","Not started",""],
+    ["Scale","Gain per Mtok reaches the minimum. One decision 5 round has a result.","no","Not started","E2 and decision 5 are in this phase."]],
+   vi:[
+    ["Thước đo trước","MDE80 ≤ δ_target. Judge đạt κ ≥ 0.6 và đúng 8/10 cặp.","part","Một nửa","MDE80 6.9 ≤ 8 trên repo thật. Chưa calibrate judge."],
+    ["H0 chạy headless","Mọi dev task có trace và score. Doctor pass mọi probe.","part","Một nửa","21/21 run có trace và score. Chưa chạy doctor live trên macOS."],
+    ["Một contrastive step","Vòng chạy đủ trên mọi dev task. Gate fail nếu E1 trên dev là Tệ hơn.","part","Đã chạy","Vòng lặp chạy trên 1 task. E1 cần từ 2 task."],
+    ["Library và reflection","Ước lượng library ≥ −δ_min trên holdout. Reuse ≥ 20%.","no","Đóng băng","Đã có code. Chờ E2 Pass."],
+    ["Đóng gói và onboard","Người khác bootstrap project mới chỉ bằng README.","no","Chưa bắt đầu",""],
+    ["Scale","Gain per Mtok đạt ngưỡng. Có ít nhất một đợt quyết định 5 có kết quả.","no","Chưa bắt đầu","E2 và quyết định 5 nằm ở phase này."]]},
+ "pJ.note":{en:"Phase 6 belongs to the template, not to a project. It starts after the data gate of the lesson store.",
+            vi:"Phase 6 thuộc về template, không thuộc project. Nó bắt đầu sau data gate của lesson store."},
+
+ /* title block */
+ "tb.k":{en:["Title","Source plan","Method","Writing","Technical words","Owner","Date","Sheet","Evidence","Revision"],
+         vi:["Tên","Plan gốc","Phương pháp","Văn phong","Từ kỹ thuật","Owner","Ngày","Tờ","Bằng chứng","Bản"]},
+ "tb.writing":{en:"ASD-STE100, about 80%", vi:"Tinh thần ASD-STE100: câu ngắn, chủ động"},
+ "tb.rev":{en:"2 · rev 1: 2026-10-20", vi:"2 · rev 1: 2026-10-20"},
+ "tb.sheet":{en:"1 of 1", vi:"1/1"}
+};
+
+function tx(v){ if(v==null) return ""; if(typeof v==="string" || Array.isArray(v)) return v; return (v[S.lang]!=null) ? v[S.lang] : v.en; }
+function t(k){ var v=T[k]; if(v===undefined){ return k; } return tx(v); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];}); }
+function nwords(s){ return s.split(/\s+/).filter(function(w){return /[A-Za-z0-9À-ɏͰ-Ͽ]/.test(w);}).length; }
+function steHTML(text, kind){
+  if(!(S.wc && S.lang==="en")) return esc(text);
+  var lim = kind==="p" ? 20 : 25;
+  return text.split(/(?<=[.!?])\s+/).map(function(s){
+    var n = nwords(s);
+    return '<span class="ste-s">'+esc(s)+'<sup class="wcb'+(n>lim?' over':'')+'" aria-hidden="true">'+n+'/'+lim+'</sup></span>';
+  }).join(" ");
+}
+
+/* ---------- Flow model ---------- */
+var LANES = [
+  {k:"lane.h", y0:32, y1:128},
+  {k:"lane.o", y0:128, y1:232},
+  {k:"lane.e", y0:232, y1:368},
+  {k:"lane.r", y0:368, y1:504},
+  {k:"lane.s", y0:504, y1:600}
+];
+var NODES = [
+  {id:"h_both", x:950, y:80, h:44},
+  {id:"h_pr", x:1080, y:80, b:{prod:9}},
+  {id:"h_libpr", x:1340, y:80, b:{prod:11, dev:11}},
+  {id:"h_promo", x:1470, y:80, dash:true},
+  {id:"o_trig", x:300, y:184, dia:true, k:{prod:"n.o_trig", dev:"n.o_trig.e", hold:"n.o_trig.e"}, b:2},
+  {id:"o_gate", x:950, y:184, dia:true, b:8},
+  {id:"o_score", x:1080, y:184, b:{dev:9, hold:9}},
+  {id:"e_ref", x:170, y:300, b:1},
+  {id:"e_pA", x:560, y:267, h:46, b:4},
+  {id:"e_pB", x:560, y:333, h:46},
+  {id:"e_comp", x:820, y:300, b:6},
+  {id:"e_base", x:1092, y:300, w:88},
+  {id:"r_inv", x:430, y:403, h:46, b:3},
+  {id:"r_dom", x:430, y:469, h:46},
+  {id:"r_comp", x:690, y:436, b:5},
+  {id:"r_sel", x:950, y:436, dash:true, b:7},
+  {id:"r_refl", x:1210, y:436, b:{prod:10, dev:10}},
+  {id:"s_h0", x:170, y:552},
+  {id:"s_runs", x:690, y:552},
+  {id:"s_eval", x:1080, y:552},
+  {id:"s_branch", x:1210, y:552},
+  {id:"s_lib", x:1340, y:552, k:{prod:"n.s_lib", dev:"n.s_lib", hold:"n.s_lib.h"}, b:12}
+];
+var EDGES = [
+  {id:"e1", d:["M170,526 V326"], l:[["el.loads",177,440,"start"]]},
+  {id:"e2", d:["M222,300 H300 V216"], l:[["el.trace",261,293,"middle"]]},
+  {id:"e3", d:["M356,184 H365 V469 H378","M365,403 H378"], j:[[365,403]], l:[[{prod:"el.yes",dev:"el.always",hold:"el.always"},371,262,"start"]]},
+  {id:"e4", d:["M300,152 V142 H880 V184 H894"], l:[["el.no",590,158,"middle"]]},
+  {id:"e5", d:["M482,403 H491 V267 H508","M482,469 H499 V333 H508"], l:[["el.cand",486,304,"end"]]},
+  {id:"e6", d:["M612,267 H626 V430 H638","M612,333 H620 V442 H638"], l:[["el.traj",612,394,"end"]]},
+  {id:"e7", d:["M690,462 V526"], l:[["el.hx",683,500,"end"]]},
+  {id:"e8", d:["M742,436 H820 V326"], l:[["el.h",781,428,"middle"]]},
+  {id:"e9", d:["M872,300 H950 V216"], j:[[950,300]], l:[["el.deliv",911,293,"middle"]]},
+  {id:"e10", d:["M950,300 V410"], dash:true, l:[["el.kpar",957,374,"start"]]},
+  {id:"e11", d:["M950,152 V102"], l:[["el.both",957,141,"start"]]},
+  {id:"e12", d:["M1006,184 H1015 V80 H1028"], l:[["el.pass",1021,121,"start"]]},
+  {id:"e13", d:["M1006,184 H1028"]},
+  {id:"e14", d:["M1092,274 V210"], l:[["el.mruns",1099,246,"start"]]},
+  {id:"e15", d:["M1038,210 V526"], l:[["el.score",1044,474,"start"]]},
+  {id:"e16", d:["M720,526 V496 H1032 A6,6 0 0 1 1044,496 H1180 V462"], l:[["el.xd",840,490,"middle"]]},
+  {id:"e17", d:["M1210,462 V526"], l:[["el.lessons",1217,500,"start"]]},
+  {id:"e18", d:["M1262,552 H1275 V80 H1288"], l:[["el.weekly1",1268,292,"end"],["el.weekly2",1268,306,"end"]]},
+  {id:"e19", d:["M1340,106 V526"], l:[["el.merge",1347,400,"start"]]},
+  {id:"e20", d:["M1340,578 V618 H430 V492"], l:[[{prod:"el.next",dev:"el.next",hold:"el.snap"},885,612,"middle"]]},
+  {id:"e21", d:["M1392,552 H1470 V106"], dash:true, l:[["el.consol",1463,330,"end"]]},
+  {id:"e22", d:["M1470,54 V14 H110 V552 H118"], dash:true, l:[["el.h0only",790,27,"middle"]]},
+  {id:"e23", d:["M1132,80 H1180 V410"], l:[["el.review",1174,362,"end"]]}
+];
+var OFF = {
+  prod:{n:["o_score","e_base","s_eval"], e:["e13","e14","e15"]},
+  dev:{n:["h_pr"], e:["e4","e12","e23"]},
+  hold:{n:["h_pr","r_refl","s_branch","h_libpr"], e:["e4","e12","e23","e16","e17","e18","e19"]}
+};
+var STEPS = [
+  {a:"lane.e", t:"s1.t", x:"s1.x", n:["s_h0","e_ref","setupchk"], e:["e1"]},
+  {a:"lane.o", t:"s2.t", x:{prod:"s2.x.p",dev:"s2.x.e",hold:"s2.x.e"}, n:["o_trig"], e:["e2","e4"]},
+  {a:"lane.r", t:"s3.t", x:"s3.x", n:["r_inv","r_dom","s_lib"], e:["e3","e20"]},
+  {a:"lane.e", t:"s4.t", x:"s4.x", n:["e_pA","e_pB"], e:["e5"]},
+  {a:"lane.r", t:"s5.t", x:"s5.x", n:["r_comp","s_runs"], e:["e6","e7"]},
+  {a:"lane.e", t:"s6.t", x:"s6.x", n:["e_comp"], e:["e8"]},
+  {a:"lane.r", t:"s7.t", x:"s7.x", n:["r_sel"], e:["e10"]},
+  {a:"lane.o", t:"s8.t", x:{prod:"s8.x",dev:"s8.x.e",hold:"s8.x.e"}, n:["o_gate","h_both","gatechk"], e:["e9","e11"]},
+  {a:{prod:"lane.h",dev:"lane.o",hold:"lane.o"}, t:{prod:"s9.t.p",dev:"s9.t.e",hold:"s9.t.e"}, x:{prod:"s9.x.p",dev:"s9.x.e",hold:"s9.x.e"},
+     n:{prod:["h_pr"],dev:["o_score","e_base","s_eval"],hold:["o_score","e_base","s_eval"]}, e:{prod:["e12"],dev:["e13","e14","e15"],hold:["e13","e14","e15"]}},
+  {a:"lane.r", t:"s10.t", x:{prod:"s10.x.p",dev:"s10.x.d",hold:"s10.x.h"}, n:["r_refl","s_branch"], e:{prod:["e16","e17","e23"],dev:["e16","e17"],hold:[]}, quiet:{hold:true}},
+  {a:"lane.h", t:"s11.t", x:{prod:"s11.x",dev:"s11.x",hold:"s11.x.h"}, n:["h_libpr","s_branch","s_lib"], e:["e18","e19"], quiet:{hold:true}},
+  {a:"lane.h", t:"s12.t", x:{prod:"s12.x",dev:"s12.x",hold:"s12.x.h"}, n:["s_lib","r_inv","r_dom","h_promo","s_h0"], e:["e20","e21","e22"]}
+];
+function bm(v){ return (v && typeof v==="object" && !Array.isArray(v) && ("prod" in v || "dev" in v || "hold" in v)) ? v[S.mode] : v; }
+function stepAt(i){
+  var s = STEPS[i];
+  return {a:t(bm(s.a))[0], t:t(bm(s.t)), x:t(bm(s.x)), n:bm(s.n)||[], e:bm(s.e)||[], quiet:!!(s.quiet && s.quiet[S.mode])};
+}
+
+function buildFlow(){
+  var svg = document.getElementById("flow");
+  var off = OFF[S.mode];
+  var st = S.step>=0 ? stepAt(S.step) : null;
+  var h = '<defs>'+
+    '<marker id="ah" viewBox="0 0 10 10" refX="9.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path class="mk" d="M0,0 L10,5 L0,10 z"/></marker>'+
+    '<marker id="ahon" viewBox="0 0 10 10" refX="9.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path class="mk-on" d="M0,0 L10,5 L0,10 z"/></marker>'+
+    '</defs>';
+  LANES.forEach(function(ln,i){
+    h += '<rect class="lane'+(i%2?' alt':'')+'" x="0" y="'+ln.y0+'" width="1540" height="'+(ln.y1-ln.y0)+'"/>';
+  });
+  LANES.forEach(function(ln){
+    var nm = t(ln.k);
+    h += '<line class="lb" x1="0" x2="1540" y1="'+ln.y0+'" y2="'+ln.y0+'"/>';
+    h += '<text class="ln1" x="12" y="'+(ln.y0+24)+'">'+esc(nm[0])+'</text><text class="ln2" x="12" y="'+(ln.y0+40)+'">'+esc(nm[1])+'</text>';
+  });
+  h += '<line class="lb" x1="0" x2="1540" y1="600" y2="600"/>';
+  h += '<line class="lcol" x1="100" x2="100" y1="32" y2="600"/>';
+
+  EDGES.forEach(function(e){
+    var cls = "edge";
+    if(e.dash) cls += " dash";
+    var isOn = st && st.e.indexOf(e.id)>=0;
+    if(off.e.indexOf(e.id)>=0) cls += " off";
+    else if(isOn) cls += " on";
+    else if(st) cls += " dim";
+    h += '<g class="'+cls+'">';
+    e.d.forEach(function(d){ h += '<path class="ep" d="'+d+'" marker-end="url(#'+(isOn?'ahon':'ah')+')"/>'; });
+    (e.j||[]).forEach(function(p){ h += '<circle class="jd" cx="'+p[0]+'" cy="'+p[1]+'" r="2.6"/>'; });
+    (e.l||[]).forEach(function(lb){
+      var key = bm(lb[0]);
+      h += '<text class="el" x="'+lb[1]+'" y="'+lb[2]+'" text-anchor="'+lb[3]+'">'+esc(t(key))+'</text>';
+    });
+    h += '</g>';
+  });
+  // gate checks caption
+  var gOn = st && st.n.indexOf("gatechk")>=0;
+  h += '<text class="ft'+(gOn?' on':(st?' dim':''))+'" x="944" y="240" text-anchor="end">'+esc(t("el.gatechk"))+'</text>';
+  // workspace setup caption
+  var wOn = st && st.n.indexOf("setupchk")>=0;
+  h += '<text class="ft'+(wOn?' on':(st?' dim':''))+'" x="178" y="348" text-anchor="start">'+esc(t("el.setup"))+'</text>';
+
+  NODES.forEach(function(nd){
+    var w = nd.w||104, hh = nd.h||52;
+    var cls = "node"+(nd.dash?" dash":"");
+    var isOn = st && st.n.indexOf(nd.id)>=0;
+    if(off.n.indexOf(nd.id)>=0) cls += " off";
+    else if(isOn) cls += " on";
+    else if(st) cls += " dim";
+    var lab = t(bm(nd.k) || ("n."+nd.id));
+    h += '<g class="'+cls+'">';
+    var bx, by;
+    if(nd.dia){
+      var a=56, b=32;
+      h += '<polygon class="nb" points="'+nd.x+','+(nd.y-b)+' '+(nd.x+a)+','+nd.y+' '+nd.x+','+(nd.y+b)+' '+(nd.x-a)+','+nd.y+'"/>';
+      h += '<text class="nt1" x="'+nd.x+'" y="'+(nd.y-2)+'" text-anchor="middle" style="font-size:11.5px">'+esc(lab[0])+'</text>';
+      h += '<text class="nt2" x="'+nd.x+'" y="'+(nd.y+12)+'" text-anchor="middle" style="font-size:9.5px">'+esc(lab[1])+'</text>';
+      bx = nd.x-a+6; by = nd.y-b+6;
+    } else {
+      h += '<rect class="nb" x="'+(nd.x-w/2)+'" y="'+(nd.y-hh/2)+'" width="'+w+'" height="'+hh+'"/>';
+      var o1 = hh>=52 ? -4 : -3, o2 = hh>=52 ? 14 : 13;
+      h += '<text class="nt1" x="'+nd.x+'" y="'+(nd.y+o1)+'" text-anchor="middle">'+esc(lab[0])+'</text>';
+      h += '<text class="nt2" x="'+nd.x+'" y="'+(nd.y+o2)+'" text-anchor="middle">'+esc(lab[1])+'</text>';
+      bx = nd.x-w/2; by = nd.y-hh/2;
+    }
+    var bn = bm(nd.b);
+    if(bn){ h += '<g class="bdg"><circle cx="'+bx+'" cy="'+by+'" r="9"/><text x="'+bx+'" y="'+(by+3.5)+'" text-anchor="middle">'+bn+'</text></g>'; }
+    h += '</g>';
+  });
+  svg.innerHTML = h;
+  svg.setAttribute("aria-label", t("flow.aria"));
+}
+
+function buildLegend(){
+  document.getElementById("legend").innerHTML =
+    '<span><i class="lg-box d"></i>'+esc(t("lg.dash"))+'</span>'+
+    '<span><i class="lg-box f"></i>'+esc(t("lg.fade"))+'</span>'+
+    '<span><i class="lg-no">1</i>'+esc(t("lg.no"))+'</span>'+
+    '<span><svg width="22" height="12" viewBox="0 0 22 12" aria-hidden="true"><path d="M0,9 H7 A4,4 0 0 1 15,9 H22" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M11,0 V12" stroke="currentColor" stroke-width="1.3"/></svg>'+esc(t("lg.hop"))+'</span>';
+}
+
+function buildSteps(){
+  var ol = document.getElementById("steps"), h = "";
+  for(var i=0;i<STEPS.length;i++){
+    var s = stepAt(i);
+    h += '<li class="st'+(i===S.step?' on':'')+(s.quiet?' quiet':'')+'"><button type="button" data-i="'+i+'" aria-current="'+(i===S.step?'step':'false')+'">'+
+      '<span class="no">'+(i+1)+'</span><span class="ac">'+esc(s.a)+'</span><span class="tt">'+esc(s.t)+'</span><span class="tx">'+steHTML(s.x,"d")+'</span></button></li>';
+  }
+  ol.innerHTML = h;
+}
+
+function buildCaption(note){
+  var cap = document.getElementById("cap");
+  if(S.step<0){ cap.innerHTML = esc(t("cap.idle")) + (note?'<span class="w">'+esc(note)+'</span>':''); return; }
+  var s = stepAt(S.step);
+  cap.innerHTML = '<span class="k">'+esc(t("cap.step").replace("{n}",S.step+1))+' · '+esc(s.a)+'</span><b>'+esc(s.t)+'.</b> '+steHTML(s.x,"d") + (note?'<span class="w">'+esc(note)+'</span>':'');
+}
+
+/* ---------- Tables ---------- */
+function table(id, head, rows, opt){
+  opt = opt||{};
+  var h = '<thead><tr>'+head.map(function(c,ci){ return '<th'+(opt.hl===ci?' class="c-on"':'')+'>'+esc(c)+'</th>'; }).join('')+'</tr></thead><tbody>';
+  rows.forEach(function(r){
+    h += '<tr>'+r.map(function(c,ci){
+      var cls = [];
+      if(opt.key===ci) cls.push("k");
+      if(opt.mono && opt.mono.indexOf(ci)>=0) cls.push("m");
+      if(opt.hl===ci) cls.push("c-on");
+      var content = (opt.ste && opt.ste.indexOf(ci)>=0) ? steHTML(c,"d") : esc(c);
+      if(opt.chip===ci) content = '<span class="ph-chip'+(c==="Phase 5"?' late':'')+'">'+esc(c)+'</span>';
+      if(opt.num && opt.key===ci) content = '<span class="num">'+esc(r[0])+'</span>'+content;
+      return '<td data-label="'+esc(head[ci])+'"'+(cls.length?' class="'+cls.join(' ')+'"':'')+'>'+content+'</td>';
+    }).join('')+'</tr>';
+  });
+  document.getElementById(id).innerHTML = h + '</tbody>';
+}
+function buildTables(){
+  table("tblBlocks", t("tb.blocks.h"), t("tb.blocks"), {key:0, mono:[2], ste:[1]});
+  table("tblOwners", t("tb.own.h"), t("tb.own"), {key:0, mono:[1]});
+  table("tblModes", t("tb.modes.h"), t("tb.modes"), {key:0, hl:(S.mode==="prod"?1:2), ste:[1,2]});
+  table("tblRules", t("tb.rules.h"), t("tb.rules"), {key:1, mono:[0], ste:[3], chip:4, num:true});
+  table("tblGraders", t("tb.grad.h"), t("tb.grad"), {key:0, mono:[1]});
+  document.getElementById("defs").innerHTML = t("pE.defs").map(function(d){ return '<li>'+steHTML(d,"d")+'</li>'; }).join('');
+  document.getElementById("rules").innerHTML = t("pE.rules").map(function(r){ return '<li><b>'+esc(r[0])+'.</b> '+steHTML(r[1],"d")+'</li>'; }).join('');
+  var tags = t("pG.tag");
+  document.getElementById("layers").innerHTML = t("pG.rows").map(function(r,i){
+    return '<li><span class="ly-n">'+(i+1)+'</span><span class="ly-t">'+esc(r[0])+'</span><span class="tag '+(r[1]==="a"?'auth':'loc')+'">'+esc(r[1]==="a"?tags[0]:tags[1])+'</span><span class="ly-x">'+steHTML(r[2],"d")+'</span></li>';
+  }).join('');
+  document.getElementById("phases").innerHTML = t("pJ.rows").map(function(r,i){
+    return '<li class="phi"><span class="ph-y">Phase '+i+'</span><span class="ph-d '+r[2]+'"></span><span class="ph-n">'+esc(r[0])+'</span><span class="ph-g">'+steHTML(r[1],"d")+'</span>'+
+      '<span class="ph-s"><span class="tag '+r[2]+'">'+esc(r[3])+'</span>'+(r[4]?'<span>'+steHTML(r[4],"d")+'</span>':'')+'</span></li>';
+  }).join('');
+  // H · checks in order, and the encode / verify / retro strip
+  document.getElementById("checks").innerHTML = t("pH.rows").map(function(r,i){
+    return '<li><span class="ly-n">'+(i+1)+'</span><span class="ly-t">'+esc(r[0])+'<code class="ly-c">'+esc(r[1])+'</code></span><span class="tag '+r[2]+'">'+esc(r[3])+'</span><span class="ly-x">'+steHTML(r[4],"d")+'</span></li>';
+  }).join('');
+  document.getElementById("evr").innerHTML = t("pH.evr").map(function(r){
+    return '<div><span class="l">'+esc(r[1])+'</span><span class="n">'+esc(r[0])+'<span class="tag '+r[2]+'">'+esc(r[3])+'</span></span><span class="x">'+steHTML(r[4],"d")+'</span></div>';
+  }).join('');
+  // I · code layers
+  var arrow = t("pI.arrow"), lnT = t("pI.lines"), maxL = 4398;
+  document.getElementById("lyrs").innerHTML = t("pI.rows").map(function(r){
+    var w = (66*r[5]/maxL).toFixed(1);
+    return '<li'+(r[2]?'':' class="none"')+' data-arrow="'+esc(arrow)+'"><span class="ly-nm">'+esc(r[0])+'<span class="ly-f">'+esc(r[1])+'</span></span>'+
+      (r[2]?'<span class="tag '+r[2]+'">'+esc(r[3])+'</span>':'<span></span>')+
+      '<span class="ly-x">'+steHTML(r[4],"d")+'</span>'+
+      '<span class="ly-b" aria-hidden="true"><i style="width:'+w+'%"></i><span>'+esc(lnT.replace("{n}", String(r[5]).replace(/\B(?=(\d{3})+(?!\d))/g," ")))+'</span></span></li>';
+  }).join('');
+  table("tblHooks", t("tb.hooks.h"), t("tb.hooks"), {key:0, mono:[1]});
+  var k = t("tb.k");
+  document.getElementById("tb").innerHTML =
+    '<div class="f w title"><div class="k">'+esc(k[0])+'</div><div class="v">'+esc(t("ui.h1"))+'</div></div>'+
+    '<div class="f"><div class="k">'+esc(k[1])+'</div><div class="v">docs/plan.md · rev 84</div></div>'+
+    '<div class="f r"><div class="k">'+esc(k[2])+'</div><div class="v"><a href="https://arxiv.org/abs/2610.14224" target="_blank" rel="noopener">Harness² · arXiv 2610.14224</a></div></div>'+
+    '<div class="f w"><div class="k">'+esc(k[3])+'</div><div class="v">'+esc(t("tb.writing"))+'</div></div>'+
+    '<div class="f w"><div class="k">'+esc(k[4])+'</div><div class="v mono" style="font:12px var(--f-mono)">harness, executor, run, pass, fail, merge, PR, gate, worktree, trace, kernel, eval-check</div></div>'+
+    '<div class="f"><div class="k">'+esc(k[5])+'</div><div class="v">Nguyễn Duy Thức</div></div>'+
+    '<div class="f r"><div class="k">'+esc(k[6])+'</div><div class="v">2026-11-04</div></div>'+
+    '<div class="f w"><div class="k">'+esc(k[8])+'</div><div class="v mono" style="font:12px var(--f-mono)">docs/verification.md T1–T18 · DECISIONS.md C1–C38 · ARCHITECTURE.md</div></div>'+
+    '<div class="f"><div class="k">'+esc(k[9])+'</div><div class="v">'+esc(t("tb.rev"))+'</div></div>'+
+    '<div class="f r"><div class="k">'+esc(k[7])+'</div><div class="v">'+esc(t("tb.sheet"))+'</div></div>';
+}
+
+/* ---------- Rule figure (panel E) ---------- */
+function buildRuleFig(){
+  var X = function(v){ return 40 + (v+10)*14; };
+  var lbl = t("pE.lbl");
+  var iv = [[2,10,6,"i-pass"],[-3,7,2,"i-inc"],[-1.5,2.5,0.5,"i-fail"],[-8,-2,-5,"i-fail"]];
+  var h = '';
+  h += '<line class="gl" x1="'+X(0)+'" x2="'+X(0)+'" y1="26" y2="160"/>';
+  h += '<line class="gl" x1="'+X(3)+'" x2="'+X(3)+'" y1="26" y2="160"/>';
+  h += '<text class="tk" x="'+X(0)+'" y="18" text-anchor="middle">0</text>';
+  h += '<text class="tk" x="'+(X(3)+4)+'" y="18" text-anchor="start">δ_min = 3</text>';
+  iv.forEach(function(r,i){
+    var y = 44 + i*32;
+    h += '<g class="'+r[3]+'"><line class="iv" x1="'+X(r[0])+'" x2="'+X(r[1])+'" y1="'+y+'" y2="'+y+'"/>'+
+         '<line class="iv" x1="'+X(r[0])+'" x2="'+X(r[0])+'" y1="'+(y-6)+'" y2="'+(y+6)+'"/>'+
+         '<line class="iv" x1="'+X(r[1])+'" x2="'+X(r[1])+'" y1="'+(y-6)+'" y2="'+(y+6)+'"/>'+
+         '<circle cx="'+X(r[2])+'" cy="'+y+'" r="4"/></g>';
+    h += '<text class="lb" x="358" y="'+(y+4)+'">'+esc(lbl[i])+'</text>';
+  });
+  h += '<line class="ax" x1="40" x2="348" y1="172" y2="172"/>';
+  [-10,-5,0,5,10].forEach(function(v){
+    h += '<line class="ax" x1="'+X(v)+'" x2="'+X(v)+'" y1="172" y2="177"/><text class="tk" x="'+X(v)+'" y="189" text-anchor="middle">'+v+'</text>';
+  });
+  var ax = t("pE.axis");
+  h += '<text class="tk" x="358" y="176">'+esc(ax[0])+'</text><text class="tk" x="358" y="189">'+esc(ax[1])+'</text>';
+  var svg = document.getElementById("ruleFig");
+  svg.innerHTML = h;
+  svg.setAttribute("aria-label", lbl.join(", ")+". "+t("pE.cap"));
+}
+
+/* ---------- Room figure (panel H): T18, mean H0 score of each dev task over 3 runs ---------- */
+var ROOM = [["c3",100],["c4",100],["d2",100],["s1",95.8],["c6",93.9],["l1",91.7],["m2",81.9]];
+var ROOM_MDE = 6.9;
+function buildRoomFig(){
+  var X = function(v){ return 44 + (v-80)*17.8; };
+  var line = 100 - ROOM_MDE, mean = 0;
+  ROOM.forEach(function(r){ mean += r[1]; }); mean = Math.round(mean/ROOM.length*10)/10;
+  var h = '<rect class="zone" x="'+X(line)+'" y="16" width="'+(X(100)-X(line))+'" height="158"/>';
+  h += '<line class="tg" x1="'+X(line)+'" x2="'+X(line)+'" y1="16" y2="174"/>';
+  h += '<text class="tk" x="'+X(line)+'" y="11" text-anchor="middle">'+esc(t("pH.line"))+'</text>';
+  var rows = ROOM.concat([[t("pH.mean"), mean, true]]);
+  rows.forEach(function(r,i){
+    var y = 28 + i*19, cx = X(r[1]);
+    h += '<text class="'+(r[2]?'lb':'tk')+'" x="36" y="'+(y+4)+'" text-anchor="end">'+esc(r[0])+'</text>';
+    h += '<line class="stem" x1="'+X(80)+'" x2="'+cx+'" y1="'+y+'" y2="'+y+'"/>';
+    if(r[2]) h += '<path class="dot-mean" d="M'+cx+','+(y-6)+' l6,6 l-6,6 l-6,-6 z"/>';
+    else h += '<circle class="'+(r[1]>line?'dot-low':'dot-ok')+'" cx="'+cx+'" cy="'+y+'" r="4.5"/>';
+    // A label that would cross the dashed line goes to the left of its dot.
+    var cross = cx < X(line) && cx + 40 > X(line);
+    h += '<text class="vl" x="'+(cross ? cx-9 : cx+9)+'" y="'+(y+4)+'" text-anchor="'+(cross?'end':'start')+'"'+(cross?' style="paint-order:stroke;stroke:var(--paper);stroke-width:4px;stroke-linejoin:round"':'')+'>'+r[1]+'</text>';
+  });
+  h += '<line class="ax" x1="'+X(80)+'" x2="'+X(100)+'" y1="174" y2="174"/>';
+  [80,85,90,95,100].forEach(function(v){
+    h += '<line class="ax" x1="'+X(v)+'" x2="'+X(v)+'" y1="174" y2="179"/><text class="tk" x="'+X(v)+'" y="191" text-anchor="middle">'+v+'</text>';
+  });
+  var svg = document.getElementById("roomFig");
+  svg.innerHTML = h;
+  svg.setAttribute("aria-label", t("pH.fig")+": "+ROOM.map(function(r){ return r[0]+" "+r[1]; }).join(", ")+"; "+t("pH.mean")+" "+mean+". "+t("pH.line")+".");
+}
+
+/* ---------- MDE80 simulation (panel F) ---------- */
+var TQ = [3.07768,1.88562,1.63774,1.53321,1.47588,1.43976,1.41492,1.39682,1.38303,1.37218,1.36343,1.35622,1.35017,1.34503,1.34061,1.33676,1.33338,1.33039,1.32773,1.32534,1.32319,1.32124,1.31946,1.31784,1.31635,1.31497,1.3137,1.31253,1.31143,1.31042];
+var NSIM = 20000, SIM = {};
+function rng(seed){ return function(){ seed = (seed + 0x6D2B79F5)|0; var x = Math.imul(seed ^ (seed>>>15), 1|seed); x = (x + Math.imul(x ^ (x>>>7), 61|x)) ^ x; return ((x ^ (x>>>14))>>>0)/4294967296; }; }
+function sims(n){
+  if(SIM[n]) return SIM[n];
+  var r = rng(9137 + n*101), zb = new Float64Array(NSIM), sz = new Float64Array(NSIM), spare = null;
+  function z(){ if(spare!==null){ var s=spare; spare=null; return s; } var u=0,v=0; while(u===0) u=r(); v=r(); var m=Math.sqrt(-2*Math.log(u)); spare = m*Math.sin(2*Math.PI*v); return m*Math.cos(2*Math.PI*v); }
+  for(var i=0;i<NSIM;i++){
+    var s1=0, s2=0;
+    for(var j=0;j<n;j++){ var x=z(); s1+=x; s2+=x*x; }
+    var mean = s1/n;
+    zb[i] = mean; sz[i] = Math.sqrt(Math.max(0,(s2 - n*mean*mean)/(n-1)));
+  }
+  return (SIM[n] = {zb:zb, sz:sz});
+}
+function thresholds(n, sd, dmin){
+  var p = sims(n), tq = TQ[n-2], q = Math.sqrt(n), out = new Float64Array(NSIM);
+  for(var i=0;i<NSIM;i++){
+    var a = sd*(tq*p.sz[i]/q - p.zb[i]);
+    var b = dmin - sd*p.zb[i];
+    out[i] = a>b ? a : b;
+  }
+  out.sort();
+  return out;
+}
+function frac(sorted, v){ var lo=0, hi=sorted.length; while(lo<hi){ var mid=(lo+hi)>>1; if(sorted[mid]<v) lo=mid+1; else hi=mid; } return lo/sorted.length; }
+function val(id){ return parseFloat(document.getElementById(id).value); }
+function fmt(v,d){ return v.toFixed(d); }
+var PRESETS = {
+  t18:{"c-n":5, "c-m":3, "c-sr":4.7, "c-si":5, "c-dm":3, "c-dt":8, "c-h0":94.8},
+  plan:{"c-n":12, "c-m":3, "c-sr":10, "c-si":5, "c-dm":3, "c-dt":8, "c-h0":60}
+};
+function setPreset(p){
+  var v = PRESETS[p]; if(!v) return;
+  Object.keys(v).forEach(function(id){ document.getElementById(id).value = v[id]; });
+  calc();
+}
+function markPresets(){
+  var bs = document.querySelectorAll("#presets button[data-preset]");
+  for(var i=0;i<bs.length;i++){
+    var v = PRESETS[bs[i].getAttribute("data-preset")];
+    var same = Object.keys(v).every(function(id){ return Math.abs(val(id) - v[id]) < 1e-9; });
+    bs[i].setAttribute("aria-pressed", same ? "true" : "false");
+  }
+}
+function calc(){
+  var n=val("c-n"), m=val("c-m"), sr=val("c-sr"), si=val("c-si"), dm=val("c-dm"), dt=val("c-dt"), h0=val("c-h0");
+  document.getElementById("o-n").textContent = n;
+  document.getElementById("o-m").textContent = m;
+  document.getElementById("o-sr").textContent = fmt(sr,1);
+  document.getElementById("o-si").textContent = si;
+  document.getElementById("o-dm").textContent = fmt(dm,1);
+  document.getElementById("o-dt").textContent = fmt(dt,1);
+  document.getElementById("o-h0").textContent = fmt(h0,1);
+  var sd = Math.sqrt(si*si + 2*sr*sr/m);
+  var th = thresholds(n, sd, dm);
+  var mde = th[Math.floor(0.8*NSIM)];
+  var room = Math.max(0, 100 - h0);
+  var gain = Math.min(4, room);
+  var pp = gain > 0 ? frac(th, gain) : 0;
+  var low = room <= mde;
+  document.getElementById("v-sd").textContent = fmt(sd,1);
+  document.getElementById("v-mde").textContent = fmt(mde,1);
+  document.getElementById("l-pp").textContent = t("k.pp").replace("{g}", gain===4 ? "4" : fmt(gain,1));
+  document.getElementById("v-pp").textContent = fmt(pp*100,0)+"%";
+  var vr = document.getElementById("v-room");
+  vr.textContent = fmt(room,1); vr.className = "v"+(low?" over":"");
+  var over = mde > dt;
+  var vd = document.getElementById("verdict");
+  vd.className = "verdict"+(over?" over":"");
+  vd.textContent = t(over?"v.no":"v.ok");
+  var vd2 = document.getElementById("verdict2");
+  vd2.className = "verdict"+(low?" over":"");
+  vd2.textContent = t(low?"v.room.no":"v.room.ok").replace("{r}", fmt(room,1)).replace("{m}", fmt(mde,1));
+  document.getElementById("cost").textContent = t("v.cost").replace("{r}", n*m*10).replace("{s}", n*m*6).replace("{j}", n*m*4);
+  // gauge: paper band, MDE80 bar, room bar, δ_target line
+  var X = function(v){ return 16 + Math.min(v,20)*18; };
+  function label(v, y, txt){
+    var lx = Math.max(X(v), X(dt)) + 6, anc = "start";
+    if(v > 20){ lx = X(20) - 6; anc = "end"; }
+    else if(lx > 330){ lx = Math.min(X(v), X(dt)) - 6; anc = "end"; }
+    return '<text class="vl" x="'+lx+'" y="'+y+'" text-anchor="'+anc+'">'+esc(txt)+'</text>';
+  }
+  var g = '';
+  g += '<text class="tk" x="16" y="9">'+esc(t("g.paper"))+'</text>';
+  g += '<rect class="band" x="'+X(1.2)+'" y="14" width="'+(X(11.8)-X(1.2))+'" height="11"/>';
+  g += '<line x1="'+X(4)+'" x2="'+X(4)+'" y1="11" y2="28" style="stroke:var(--accent)" stroke-width="2"/>';
+  g += '<rect class="bar'+(over?' over':'')+'" x="'+X(0)+'" y="40" width="'+Math.max(1,X(mde)-X(0))+'" height="14"/>';
+  g += label(mde, 51, t("g.mde")+' '+fmt(mde,1)+(mde>20?' →':''));
+  g += '<rect class="rbar'+(low?' over':'')+'" x="'+X(0)+'" y="62" width="'+Math.max(1,X(room)-X(0))+'" height="14"/>';
+  g += label(room, 73, t("g.room")+' '+fmt(room,1)+(room>20?' →':''));
+  g += '<line class="tg" x1="'+X(dt)+'" x2="'+X(dt)+'" y1="32" y2="92"/>';
+  g += '<line class="ax" x1="16" x2="376" y1="92" y2="92"/>';
+  [0,5,10,15,20].forEach(function(v){ g += '<line class="ax" x1="'+X(v)+'" x2="'+X(v)+'" y1="92" y2="96"/><text class="tk" x="'+X(v)+'" y="108" text-anchor="middle">'+v+'</text>'; });
+  g += '<text class="tk" x="'+X(dt)+'" y="120" text-anchor="middle">'+esc(t("g.target"))+' '+fmt(dt,1)+'</text>';
+  var gs = document.getElementById("gauge");
+  gs.innerHTML = g;
+  gs.setAttribute("aria-label", "MDE80 "+fmt(mde,1)+", "+t("g.room")+" "+fmt(room,1)+", δ_target "+fmt(dt,1)+", SD "+fmt(sd,1));
+  markPresets();
+}
+
+/* ---------- Static text ---------- */
+function buildStatic(){
+  document.documentElement.lang = S.lang==="vi" ? "vi" : "en";
+  var els = document.querySelectorAll("[data-k]");
+  for(var i=0;i<els.length;i++){
+    var el = els[i], v = t(el.getAttribute("data-k"));
+    if(el.hasAttribute("data-ste")) el.innerHTML = steHTML(v, el.getAttribute("data-ste"));
+    else el.textContent = v;
+  }
+  document.getElementById("lang-en").setAttribute("aria-pressed", S.lang==="en");
+  document.getElementById("lang-vi").setAttribute("aria-pressed", S.lang==="vi");
+  var wcw = document.getElementById("wc-wrap"), wc = document.getElementById("wc");
+  wc.checked = S.wc; wc.disabled = S.lang!=="en";
+  wcw.classList.toggle("disabled", S.lang!=="en");
+  var mb = document.querySelectorAll("#modeseg button");
+  for(var j=0;j<mb.length;j++) mb[j].setAttribute("aria-pressed", mb[j].getAttribute("data-mode")===S.mode);
+  document.getElementById("play").textContent = t(S.playing?"ctl.pause":"ctl.play");
+}
+
+var NOTE = "";
+function renderFlowParts(){ buildFlow(); buildSteps(); buildCaption(NOTE); document.getElementById("play").textContent = t(S.playing?"ctl.pause":"ctl.play"); }
+function renderAll(){ buildStatic(); buildLegend(); buildTables(); buildRuleFig(); buildRoomFig(); renderFlowParts(); calc(); }
+
+/* ---------- Player ---------- */
+var timer = null, uttId = 0;
+function canSpeak(){ return "speechSynthesis" in window && typeof SpeechSynthesisUtterance!=="undefined"; }
+function pickVoice(){
+  if(!canSpeak()) return null;
+  var vs = window.speechSynthesis.getVoices() || [], pre = S.lang==="vi" ? "vi" : "en";
+  for(var i=0;i<vs.length;i++){ if((vs[i].lang||"").toLowerCase().indexOf(pre)===0) return vs[i]; }
+  return null;
+}
+function dur(text){ return Math.max(3800, nwords(text)*360 + 1400); }
+function stopSpeech(){ uttId++; try{ if(canSpeak()) window.speechSynthesis.cancel(); }catch(e){} }
+function cue(){
+  clearTimeout(timer); stopSpeech();
+  if(!S.playing) return;
+  var s = stepAt(S.step), text = s.t + ". " + s.x;
+  var v = S.voice ? pickVoice() : null;
+  if(S.voice && v){
+    var my = ++uttId;
+    var u = new SpeechSynthesisUtterance(text);
+    u.voice = v; u.lang = v.lang; u.rate = 1;
+    u.onend = function(){ if(my===uttId && S.playing) advance(); };
+    u.onerror = function(){ if(my===uttId && S.playing){ timer = setTimeout(advance, dur(text)); } };
+    try{ window.speechSynthesis.speak(u); }catch(e){ timer = setTimeout(advance, dur(text)); }
+  } else {
+    timer = setTimeout(advance, dur(text));
+  }
+}
+function advance(){
+  if(S.step < STEPS.length-1){ S.step++; renderFlowParts(); keepVisible(); cue(); }
+  else { S.playing = false; renderFlowParts(); }
+}
+function keepVisible(){
+  if(window.matchMedia("(max-width: 899px)").matches){
+    var li = document.querySelector(".st.on");
+    if(li && li.scrollIntoView) li.scrollIntoView({block:"nearest", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  }
+}
+function setVoiceNote(){
+  NOTE = "";
+  if(S.voice && (!canSpeak() || !pickVoice())) NOTE = t("cap.novoice");
+}
+function go(i){ S.step = Math.max(0, Math.min(STEPS.length-1, i)); renderFlowParts(); if(S.playing) cue(); }
+
+document.getElementById("play").addEventListener("click", function(){
+  if(S.playing){ S.playing=false; clearTimeout(timer); stopSpeech(); renderFlowParts(); return; }
+  S.playing = true;
+  if(S.step<0 || S.step>=STEPS.length-1) S.step = 0;
+  setVoiceNote(); renderFlowParts(); cue();
+});
+document.getElementById("prev").addEventListener("click", function(){ go(S.step<0 ? 0 : S.step-1); });
+document.getElementById("next").addEventListener("click", function(){ go(S.step+1); });
+document.getElementById("voice").addEventListener("change", function(e){
+  S.voice = e.target.checked; setVoiceNote(); buildCaption(NOTE); if(S.playing) cue();
+});
+document.getElementById("steps").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-i]"); if(!b) return;
+  go(parseInt(b.getAttribute("data-i"),10));
+});
+document.getElementById("modeseg").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-mode]"); if(!b) return;
+  S.mode = b.getAttribute("data-mode");
+  buildStatic(); buildTables(); renderFlowParts(); if(S.playing) cue();
+});
+function setLang(l){
+  S.lang = l; try{ localStorage.setItem("hfs.lang", l); }catch(e){}
+  setVoiceNote(); renderAll(); if(S.playing) cue();
+}
+document.getElementById("lang-en").addEventListener("click", function(){ setLang("en"); });
+document.getElementById("lang-vi").addEventListener("click", function(){ setLang("vi"); });
+document.getElementById("wc").addEventListener("change", function(e){
+  S.wc = e.target.checked; try{ localStorage.setItem("hfs.wc", S.wc?"1":"0"); }catch(err){}
+  renderAll();
+});
+["c-n","c-m","c-sr","c-si","c-dm","c-dt","c-h0"].forEach(function(id){ document.getElementById(id).addEventListener("input", calc); });
+document.getElementById("presets").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-preset]"); if(!b) return;
+  setPreset(b.getAttribute("data-preset"));
+});
+if(canSpeak()){ try{ window.speechSynthesis.addEventListener("voiceschanged", function(){ if(S.voice){ setVoiceNote(); buildCaption(NOTE); } }); }catch(e){} }
+
+renderAll();
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "mcp-work",
+  "description": "MCP servers for the work tools: Jira and Confluence (Server, Data Center or Cloud; read-only) and Figma. Each developer uses a personal token.",
+  "manual": [
+    "Each developer: install uv (the atlassian server runs with uvx), make a personal access token in Jira and in Confluence, and export JIRA_URL, JIRA_PERSONAL_TOKEN, CONFLUENCE_URL and CONFLUENCE_PERSONAL_TOKEN in the shell profile. Do not put a token in a commit or in a chat.",
+    "Each developer: in Claude Code, type /mcp, select figma, and authenticate in the browser.",
+    "Jira Cloud uses JIRA_USERNAME and JIRA_API_TOKEN, not JIRA_PERSONAL_TOKEN. Change the env block of .mcp.json for Cloud.",
+    "To let Claude write to Jira or Confluence, remove READ_ONLY_MODE. Decide this with the team first."
+  ]
+}

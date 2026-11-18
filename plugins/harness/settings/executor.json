@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(**/pinned-*)",
+      "Edit(**/pinned-*/**)",
+      "Edit(**/CLAUDE*.md)",
+      "Edit(**/AGENTS.md)",
+      "Edit(.claude/settings*.json)",
+      "Edit(.claude/rules/**)",
+      "Edit(.claude/hooks/**)",
+      "Edit(.claude/commands/**)",
+      "Edit(**/.mcp.json)",
+      "Edit(.github/**)",
+      "Edit(.husky/**)",
+      "Edit(harness/library/**)",
+      "Edit(harness/reports/**)",
+      "Bash(gh *)"
+    ],
+    "blockReadsOutsideWorkingDirectories": true,
+    "disableBypassPermissionsMode": "disable"
+  },
+  "disableSkillShellExecution": true,
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "autoAllowBashIfSandboxed": true,
+    "filesystem": {
+      "denyWrite": [],
+      "denyRead": []
+    },
+    "network": {
+      "allowedDomains": []
+    }
+  }
+}

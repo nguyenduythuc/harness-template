@@ -1,0 +1,39 @@
+# harness-guard: enforcement layer 5 (CI has the final authority).
+#
+# The workflow runs on pull_request_target, so GitHub takes this workflow file and the guard script
+# from the base branch. A PR cannot change the check that judges it. The job never runs code from
+# the PR head: it reads the diff and file contents with git only.
+#
+# This file is an exception path (.github/**). Only a human changes it.
+name: harness-guard
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  owner-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the base branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          # The next step fetches the PR head, and a private repo needs the token for that fetch.
+          # The token can only read (see permissions), and no step runs code from the PR head.
+
+      - name: Fetch the PR head as data
+        run: git fetch --no-tags origin "pull/${{ github.event.pull_request.number }}/head:harness-pr-head"
+
+      - name: Check owner rules and gate changes
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+        run: node .github/harness/ci-path-guard.mjs --base "$BASE_SHA" --head "$HEAD_SHA" --labels "$LABELS" --author-type "$AUTHOR_TYPE"

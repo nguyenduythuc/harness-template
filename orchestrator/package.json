@@ -1,0 +1,29 @@
+{
+  "name": "@harness-template/orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The harness orchestrator: a deterministic script that opens every agent session, measures, and records runs.",
+  "type": "module",
+  "bin": {
+    "harness": "dist/src/cli.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/check-layers.mjs && npm run build && node --test \"dist/test/**/*.test.js\"",
+    "harness": "node dist/src/cli.js",
+    "layers": "node scripts/check-layers.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.295",
+    "yaml": "2.9.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "typescript": "5.9.3"
+  }
+}

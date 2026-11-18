@@ -1,0 +1,90 @@
+# harness/pinned-config.yaml
+# A human owns this file. Agents never write it. Change it only through a PR with the
+# threshold-change label. Score thresholds (weights, delta_min, delta_target) live in the eval
+# store, not here, so that no agent can read them.
+
+version: 1
+
+# The phase that the project has reached. The orchestrator refuses a step of a later phase.
+# 0 = measure first, 1 = H0 headless, 2 = one contrastive step, 3 = library, 4 = onboard, 5 = scale.
+phase: 0
+
+# production: real tasks, decision 1 is on. eval: tasks from the eval store, decision 1 is off.
+mode: production
+
+loop:
+  k_par: 1   # parallel branches. A value above 1 needs the selector, which starts in Phase 5.
+  k_seq: 1   # sequential improvement steps per task
+  m: 3       # repeated runs of each arm on one eval task
+
+# D4: the judge model must differ from the executor model and from the editor model.
+models:
+  executor: claude-sonnet-5-5
+  editor: claude-opus-5-5
+  judge: claude-haiku-5-5
+
+# Budget per task, for the executor and every R session together.
+budget:
+  usd: 5
+  tokens: 2000000
+  headroom_usd: 0.5
+
+session:
+  max_turns: 200
+  timeout_s: 3600
+
+# Decision 1 (production only).
+trigger:
+  tool_errors_min: 3
+  p75_min_runs: 10
+
+# The deliverable gate. "TODO" makes the doctor fail until a human fills in the command.
+gate:
+  build: "{{gate.build}}"
+  typecheck: "{{gate.typecheck}}"
+  lint: "{{gate.lint}}"
+  test: "{{gate.test}}"
+  timeout_s: 900
+
+# A change to these files can loosen the gate. CI requires the gate-change label for them.
+gate_config_files:
+  - "**/package.json"
+  - "**/tsconfig*.json"
+  - "**/.eslintrc*"
+  - "**/eslint.config.*"
+  - "**/jest.config.*"
+  - "**/babel.config.*"
+
+# Instructions and skills can grow at most this many percent above the H0 of the epoch.
+growth_limit_pct: 20
+
+# Loop-owned files of H0. Only the improvement loop proposes changes to them.
+loop_owned:
+  - harness/instructions.md
+  - harness/guardrails.md
+  - harness/tool-guidance.md
+  - harness/memory.md
+  - harness/scripts/**
+  - .claude/skills/**
+  - .claude/agents/**
+
+# Hosts that sandboxed commands can reach. The gate needs the package registries.
+sandbox:
+  allowed_domains:
+    - registry.npmjs.org
+    - registry.yarnpkg.com
+
+# Commands that the orchestrator runs in each new workspace before an agent session. A workspace is a
+# fresh checkout without node_modules, so install the dependencies here. They run with the rights of
+# the user, like the gate. HARNESS_PROJECT_DIR is the main checkout. Example on macOS (APFS): clone the
+# node_modules folders of the main checkout, which is fast and does not download anything:
+#   commands:
+#     - 'ws="$PWD"; cd "$HARNESS_PROJECT_DIR" && for d in node_modules packages/*/node_modules; do if [ -d "$d" ]; then mkdir -p "$ws/$(dirname "$d")" && cp -cR "$d" "$ws/$d"; fi; done'
+workspace_setup:
+  commands: []
+  timeout_s: 900
+
+# The lesson store of this machine (D10) collects lessons and improvement steps of every project
+# for Phase 6. Set "off" when the policy of the owner of this repo does not allow a copy outside
+# the repo. "off" changes nothing in this project: the library and the run records stay the same.
+lesson_store: "on"   # "on" or "off", with the quotes (YAML 1.1 tools read a bare on as true)

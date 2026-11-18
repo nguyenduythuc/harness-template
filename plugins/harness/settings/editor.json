@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash",
+      "PowerShell",
+      "Monitor",
+      "WebFetch",
+      "WebSearch",
+      "Agent",
+      "Edit(**/pinned-*)",
+      "Edit(**/pinned-*/**)"
+    ],
+    "blockReadsOutsideWorkingDirectories": true,
+    "disableBypassPermissionsMode": "disable"
+  },
+  "disableSkillShellExecution": true
+}

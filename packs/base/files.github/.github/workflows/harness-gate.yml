@@ -1,0 +1,23 @@
+# The gate of harness/pinned-config.yaml as a pull request job, for people and for agents.
+# `harness pack install base` wrote the commands from the gate block. Keep them equal to it.
+name: harness-gate
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: {{install}}
+      - run: {{gate.build}}
+      - run: {{gate.typecheck}}
+      - run: {{gate.lint}}
+      - run: {{gate.test}}

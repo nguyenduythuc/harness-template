@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash",
+      "PowerShell",
+      "Monitor",
+      "WebFetch",
+      "WebSearch",
+      "Agent",
+      "Edit",
+      "Write",
+      "NotebookEdit"
+    ],
+    "blockReadsOutsideWorkingDirectories": true,
+    "disableBypassPermissionsMode": "disable"
+  },
+  "disableSkillShellExecution": true
+}
