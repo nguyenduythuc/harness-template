@@ -49,12 +49,22 @@ export function detectStack(projectDir) {
       extra = "--no-watchman";
       notes.push("The test script uses jest. The gate adds --no-watchman, because watchman does not run in the sandbox.");
     }
+    // A script that only prints a message and fails (for example "echo pick an env && exit 1") is not a check.
+    if (key === "build" && /\bexit\s+[1-9]/.test(scripts[name])) {
+      const alt = Object.keys(scripts).find((s) => /^build:(dev|ci|development|test)$/.test(s));
+      if (alt) {
+        gate.build = runCommand(pm, alt);
+        notes.push(`The "build" script fails on purpose, so the gate uses "${alt}". Check that it needs no secret.`);
+      } else notes.push('The "build" script fails on purpose. Set gate.build by hand, or write "none".');
+      continue;
+    }
     gate[key] = runCommand(pm, name, extra);
   }
   const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
   const reactNative = "react-native" in deps || fs.existsSync(path.join(projectDir, "ios")) || fs.existsSync(path.join(projectDir, "android"));
   const next = "next" in deps;
-  const workspaces = Array.isArray(pkg.workspaces) || (pkg.workspaces && typeof pkg.workspaces === "object");
+  const workspaces =
+    Array.isArray(pkg.workspaces) || (pkg.workspaces && typeof pkg.workspaces === "object") || fs.existsSync(path.join(projectDir, "pnpm-workspace.yaml"));
   if (reactNative) notes.push("React Native found. Native builds (xcodebuild, Gradle) can fail in the sandbox. Keep them out of the gate until Phase 1 tests them.");
   for (const [k, v] of Object.entries(gate)) if (v === "TODO") notes.push(`No script for "${k}". The doctor fails until a human fills it in.`);
   return { packageManager: pm, workspaces: Boolean(workspaces), reactNative, next, gate, notes };

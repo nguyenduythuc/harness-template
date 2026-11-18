@@ -72,6 +72,28 @@ export function pluginVersion(pluginRoot) {
  * Scaffold the harness files into `projectDir`.
  * @returns {{created: string[], proposed: string[], skipped: string[], todo: string[], stack: object}}
  */
+/** AGENTS.md files below the root, 3 levels deep at most, outside node_modules and hidden folders. */
+function nestedAgentsFiles(projectDir) {
+  const out = [];
+  const walk = (rel, depth) => {
+    if (depth > 3) return;
+    let ents = [];
+    try {
+      ents = fs.readdirSync(path.join(projectDir, rel), { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of ents) {
+      if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+      const r = rel ? `${rel}/${e.name}` : e.name;
+      if (e.isDirectory()) walk(r, depth + 1);
+      else if (e.name === "AGENTS.md" && rel) out.push(r);
+    }
+  };
+  walk("", 0);
+  return out.sort();
+}
+
 export function scaffold({ projectDir, pluginRoot = DEFAULT_PLUGIN_ROOT, dryRun = false, now = new Date() }) {
   const result = { created: [], proposed: [], skipped: [], todo: [], stack: null, ci: null };
   const stack = detectStack(projectDir);
@@ -142,12 +164,20 @@ export function scaffold({ projectDir, pluginRoot = DEFAULT_PLUGIN_ROOT, dryRun 
   // 3. The import block in CLAUDE.md.
   const block = fs.readFileSync(path.join(pluginRoot, "templates", "claude-md-block.md"), "utf8");
   const claudeAbs = path.join(projectDir, "CLAUDE.md");
+  // Claude Code reads CLAUDE.md, not AGENTS.md. A project that has AGENTS.md gets a CLAUDE.md that
+  // imports it, so both tools read the same rules. Nested AGENTS.md files get the same, beside them.
+  const hasAgents = fs.existsSync(path.join(projectDir, "AGENTS.md"));
   if (!fs.existsSync(claudeAbs)) {
-    createOnly("CLAUDE.md", `# ${path.basename(path.resolve(projectDir))}\n\n${block}`);
+    createOnly("CLAUDE.md", hasAgents ? `@AGENTS.md\n\n${block}` : `# ${path.basename(path.resolve(projectDir))}\n\n${block}`);
   } else {
     const existing = fs.readFileSync(claudeAbs, "utf8");
     if (existing.includes(BLOCK_BEGIN)) result.skipped.push("CLAUDE.md");
     else propose("CLAUDE.md", existing.replace(/\s*$/, "") + "\n\n" + block);
+  }
+
+  for (const rel of nestedAgentsFiles(projectDir)) {
+    const dir = path.posix.dirname(rel);
+    if (!fs.existsSync(path.join(projectDir, dir, "CLAUDE.md"))) createOnly(`${dir}/CLAUDE.md`, "@AGENTS.md\n");
   }
 
   // 4. The lock file: provenance of what the scaffold generated.
