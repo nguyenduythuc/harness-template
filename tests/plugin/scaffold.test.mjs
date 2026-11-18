@@ -178,3 +178,17 @@ test("detect-stack: a build script that fails on purpose is not the gate, and pn
   fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ scripts: { build: "exit 1" } }));
   assert.equal(detectStack(dir).gate.build, "TODO");
 });
+
+test("a project with Prettier gets the guard folder in .prettierignore", () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, "package.json"), "{}");
+  fs.writeFileSync(path.join(dir, "prettier.config.mjs"), "export default {};\n");
+  fs.writeFileSync(path.join(dir, ".prettierignore"), "node_modules\n");
+  const r = scaffold({ projectDir: dir });
+  assert.ok(r.proposed.includes(".prettierignore.harness-proposed"));
+  assert.equal(fs.readFileSync(path.join(dir, ".prettierignore.harness-proposed"), "utf8"), "node_modules\n.github/harness/\n");
+  const none = tmp();
+  fs.writeFileSync(path.join(none, "package.json"), "{}");
+  scaffold({ projectDir: none });
+  assert.equal(fs.existsSync(path.join(none, ".prettierignore")), false);
+});

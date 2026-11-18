@@ -156,6 +156,19 @@ export function scaffold({ projectDir, pluginRoot = DEFAULT_PLUGIN_ROOT, dryRun 
   const guardDir = CI_GUARD_DIR[ci];
   createOnly(`${guardDir}/ci-path-guard.mjs`, fs.readFileSync(path.join(pluginRoot, "scripts", "ci-path-guard.mjs"), "utf8"));
   createOnly(`${guardDir}/lib/ownership.mjs`, fs.readFileSync(path.join(pluginRoot, "scripts", "lib", "ownership.mjs"), "utf8"));
+  // A formatter must not change the copies: the doctor compares them with the plugin byte by byte.
+  const usesPrettier =
+    fs.existsSync(path.join(projectDir, ".prettierignore")) ||
+    fs.readdirSync(projectDir).some((f) => /^(\.prettierrc|prettier\.config\.)/.test(f));
+  if (usesPrettier) {
+    const ignoreAbs = path.join(projectDir, ".prettierignore");
+    const line = `${guardDir}/`;
+    if (!fs.existsSync(ignoreAbs)) createOnly(".prettierignore", `${line}\n`);
+    else {
+      const text = fs.readFileSync(ignoreAbs, "utf8");
+      if (!text.split("\n").some((l) => l.trim() === line || l.trim() === guardDir)) propose(".prettierignore", text.replace(/\s*$/, "\n") + `${line}\n`);
+    }
+  }
   if (ci === "gitlab") {
     const job = ".gitlab/harness/harness-guard.gitlab-ci.yml";
     createOnly(job, fs.readFileSync(path.join(pluginRoot, "templates", "gitlab", job), "utf8"));
